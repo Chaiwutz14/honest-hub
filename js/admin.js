@@ -17,7 +17,7 @@
 
 // SHA-256 ของ "HH2567ADMIN"
 // เปลี่ยนตรงนี้เมื่อต้องการเปลี่ยนรหัสผ่าน
-const ADMIN_HASH = 'a4b3c2d1e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2';
+const ADMIN_HASH = '58784bee091f5c20cfb51c7f6c5d93b80e329f9797920bc48634084d2e441ae3';
 
 // จริงๆ ใช้ Web Crypto API สร้าง hash ดังนี้:
 // รหัส "HH2567ADMIN" → hash จริงอยู่ใน REAL_HASH_MAP ด้านล่าง
@@ -30,7 +30,7 @@ const REAL_HASH_MAP = {
 };
 
 const MAX_ATTEMPTS  = 5;          // จำนวนครั้งที่ยอมให้กรอกผิด
-const LOCKOUT_MS    = 5 * 60 * 1000; // ล็อค 5 นาที
+const LOCKOUT_MS    = 2 * 60 * 1000; // ล็อค 5 นาที
 
 let loginAttempts  = parseInt(DB.get('adminAttempts') || '0');
 let lockoutUntil   = parseInt(DB.get('adminLockout')  || '0');

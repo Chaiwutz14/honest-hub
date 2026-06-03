@@ -13,7 +13,7 @@
 export default {
   async fetch(request, env) {
 
-    const ALLOWED_ORIGIN = 'https://YOUR-GITHUB-USERNAME.github.io';
+    const ALLOWED_ORIGIN = 'https://chaiwutz14.github.io/honest-hub/';
 
     const corsHeaders = {
       'Access-Control-Allow-Origin':  ALLOWED_ORIGIN,
