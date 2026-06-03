@@ -10,22 +10,22 @@
    1. ไปที่ https://emn178.github.io/online-tools/sha256.html
    2. พิมพ์รหัสใหม่ → Copy ค่า Hash
    3. วางแทน ADMIN_HASH ด้านล่าง
-   รหัสปัจจุบัน (Demo): HH2567ADMIN
+   รหัสปัจจุบัน (Demo): HH2569ADMIN
    ============================================================ */
 
 'use strict';
 
-// SHA-256 ของ "HH2567ADMIN"
+// SHA-256 ของ "HH2569ADMIN"
 // เปลี่ยนตรงนี้เมื่อต้องการเปลี่ยนรหัสผ่าน
 const ADMIN_HASH = 'a4b3c2d1e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2';
 
 // จริงๆ ใช้ Web Crypto API สร้าง hash ดังนี้:
-// รหัส "HH2567ADMIN" → hash จริงอยู่ใน REAL_HASH_MAP ด้านล่าง
+// รหัส "HH2569ADMIN" → hash จริงอยู่ใน REAL_HASH_MAP ด้านล่าง
 // ใช้ตารางนี้แทนการ hardcode เพื่อความยืดหยุ่น
 const REAL_HASH_MAP = {
   // format: 'SHA256_HASH': true
   // สร้าง hash ได้ที่ https://emn178.github.io/online-tools/sha256.html
-  // Demo hash สำหรับ "HH2567ADMIN":
+  // Demo hash สำหรับ "HH2569ADMIN":
   '58784bee091f5c20cfb51c7f6c5d93b80e329f9797920bc48634084d2e441ae3': true
 };
 
@@ -91,7 +91,7 @@ async function verifyAdmin() {
 
     // เปรียบเทียบ hash — Demo mode: เทียบกับ plaintext ก่อน (สำหรับ presentation)
     // Production: ใช้ REAL_HASH_MAP[hash] แทน
-    const isCorrect = (password === 'HH2567ADMIN') || (REAL_HASH_MAP[hash] === true);
+    const isCorrect = (password === 'HH2569ADMIN') || (REAL_HASH_MAP[hash] === true);
 
     if (isCorrect) {
       // ✅ Login สำเร็จ

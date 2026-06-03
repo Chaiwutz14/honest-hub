@@ -14,7 +14,7 @@
 'use strict';
 
 const SEED_BUDGET_DATA = [
-  { name: 'วันไหว้ครูประจำปี 2567',         amount: 15000,  status: 'done'     },
+  { name: 'วันไหว้ครูประจำปี 2569',         amount: 15000,  status: 'done'     },
   { name: 'โครงการอบรมคุณธรรมจริยธรรม',    amount: 28500,  status: 'progress' },
   { name: 'กีฬาสีประจำปี',                  amount: 45000,  status: 'pending'  },
   { name: 'โครงการห้องสมุดมีชีวิต',        amount: 12000,  status: 'done'     },
