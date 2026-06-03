@@ -69,7 +69,7 @@ async function renderActivityCards() {
   if (!hasSeeded) {
     // ✅ เปิดครั้งแรก — โหลด seed data และ set flag
     await DB.set('activityData',   SEED_ACTIVITY_DATA);
-    await await DB.set('activitySeeded', true);
+    await DB.set('activitySeeded', true);
   }
 
   // ดึงข้อมูลจาก DB (อาจเป็น array ว่างถ้า admin ลบหมด — นั่นคือพฤติกรรมที่ถูกต้อง)
@@ -165,7 +165,7 @@ async function addActivityCard() {
   await DB.set('activityData', data);
 
   // ต้องแน่ใจว่า flag ถูก set ด้วย (กรณีที่ admin เพิ่มหลังจากลบหมดแล้ว)
-  await await DB.set('activitySeeded', true);
+  await DB.set('activitySeeded', true);
 
   renderActivityCards();
   await addLog('เพิ่มกิจกรรม: ' + name);

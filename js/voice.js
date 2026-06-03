@@ -245,11 +245,8 @@ async function submitComment() {
     await DB.comments.add(commentData);
     await addLog('ความคิดเห็นใหม่จาก: ' + name);
 
-    // ถ้าไม่ได้ใช้ real-time listener → render ใหม่เอง
-    if (!isOnline) {
-      await renderAllComments();
-    }
-    // ถ้าใช้ real-time → onSnapshot จะ trigger renderAllComments เอง
+    // render ใหม่เสมอ — real-time listener จะ override ถ้า Firebase พร้อม
+    await renderAllComments();
 
     // Reset form
     nameInput.value  = '';
@@ -320,10 +317,12 @@ async function sendNotification(commentData) {
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify(payload),
     });
-    if (!res.ok) throw new Error('Worker ' + res.status);
 
-    // Demo simulation
-    await new Promise(r => setTimeout(r, 800));
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error(`Worker ${res.status}: ${errText}`);
+    }
+
     showToast('📬 ส่งความคิดเห็นสำเร็จ และแจ้งเตือนไลน์ผู้ดูแลระบบแล้ว', 'success');
 
   } catch (err) {

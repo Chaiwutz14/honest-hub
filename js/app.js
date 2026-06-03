@@ -98,6 +98,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (navHome)  navHome.classList.add('nav-active');
   if (mNavHome) mNavHome.classList.add('nav-active');
 
+  // โหลด admin state (loginAttempts, lockoutUntil) จาก DB
+  if (typeof loadAdminState === 'function') await loadAdminState();
+
   // Track visitor
   await trackVisitor();
 

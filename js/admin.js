@@ -32,8 +32,15 @@ const REAL_HASH_MAP = {
 const MAX_ATTEMPTS  = 5;          // จำนวนครั้งที่ยอมให้กรอกผิด
 const LOCKOUT_MS    = 5 * 60 * 1000; // ล็อค 5 นาที
 
-let loginAttempts  = parseInt(DB.get('adminAttempts') || '0');
-let lockoutUntil   = parseInt(DB.get('adminLockout')  || '0');
+// ค่าเริ่มต้น — จะถูก override โดย loadAdminState() หลัง DB พร้อม
+let loginAttempts  = 0;
+let lockoutUntil   = 0;
+
+// โหลดค่าจาก DB แบบ async (DB.get เป็น async ต้องรอ)
+async function loadAdminState() {
+  loginAttempts = parseInt((await DB.get('adminAttempts')) || '0');
+  lockoutUntil  = parseInt((await DB.get('adminLockout'))  || '0');
+}
 
 
 /* ============================================================
@@ -90,8 +97,8 @@ async function verifyAdmin() {
       // ✅ Login สำเร็จ
       isAdmin       = true;
       loginAttempts = 0;
-      DB.set('adminAttempts', 0);
-      DB.remove('adminLockout');
+      await DB.set('adminAttempts', 0);
+      await DB.remove('adminLockout');
       lockoutUntil  = 0;
 
       document.body.classList.add('admin-active');
@@ -106,16 +113,16 @@ async function verifyAdmin() {
     } else {
       // ❌ รหัสผ่านผิด
       loginAttempts++;
-      DB.set('adminAttempts', loginAttempts);
+      await DB.set('adminAttempts', loginAttempts);
 
       const remaining = MAX_ATTEMPTS - loginAttempts;
 
       if (loginAttempts >= MAX_ATTEMPTS) {
         // ล็อค 5 นาที
         lockoutUntil = Date.now() + LOCKOUT_MS;
-        DB.set('adminLockout', lockoutUntil);
+        await DB.set('adminLockout', lockoutUntil);
         loginAttempts = 0;
-        DB.set('adminAttempts', 0);
+        await DB.set('adminAttempts', 0);
         errEl.textContent = '🔒 กรอกผิดเกินกำหนด บัญชีถูกล็อค 5 นาที';
       } else {
         errEl.textContent = `❌ รหัสผ่านไม่ถูกต้อง (เหลืออีก ${remaining} ครั้ง)`;

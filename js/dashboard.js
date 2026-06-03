@@ -39,14 +39,14 @@ async function updateDashboard() {
   if (budgetEl) budgetEl.textContent = budgetData.length || 4;
 
   // Activity log
-  renderActivityLog();
+  await renderActivityLog();
 }
 
 
 /* ============================================================
    B. renderActivityLog — XSS safe (textContent ทั้งหมด)
    ============================================================ */
-function renderActivityLog() {
+async function renderActivityLog() {
   const container = document.getElementById('activityLog');
   if (!container) return;
   container.innerHTML = ''; // ล้าง container ของเราเอง
