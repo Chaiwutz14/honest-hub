@@ -1,23 +1,14 @@
 /* ============================================================
-   budget.js — Budget Hub v3.0
-   ============================================================
-   A. SEED_BUDGET_DATA  — ข้อมูลตั้งต้น
-   B. renderBudgetRows  — โหลดข้อมูลจาก DB มาแสดง (persist)
-   C. addBudgetRow      — เพิ่มแถว + บันทึก DB
-   D. deleteRow         — ลบแถว + บันทึก DB
-   E. renumberRows      — เรียงเลข # ใหม่หลังลบ
-   F. toggleBudgetEmpty — แสดง/ซ่อน empty state
-   G. closeBudgetModal  — ปิด + reset form
-   H. Input validation  — block non-numeric, negative
+   budget.js — Budget Hub v5.0
    ============================================================ */
 
 'use strict';
 
 const SEED_BUDGET_DATA = [
-  { name: 'วันไหว้ครูประจำปี 2569',         amount: 15000,  status: 'done'     },
-  { name: 'โครงการอบรมคุณธรรมจริยธรรม',    amount: 28500,  status: 'progress' },
-  { name: 'กีฬาสีประจำปี',                  amount: 45000,  status: 'pending'  },
-  { name: 'โครงการห้องสมุดมีชีวิต',        amount: 12000,  status: 'done'     },
+  { name: 'วันไหว้ครูประจำปี 2567',      amount: 15000, status: 'done'     },
+  { name: 'โครงการอบรมคุณธรรมจริยธรรม', amount: 28500, status: 'progress' },
+  { name: 'กีฬาสีประจำปี',               amount: 45000, status: 'pending'  },
+  { name: 'โครงการห้องสมุดมีชีวิต',     amount: 12000, status: 'done'     },
 ];
 
 const BADGE_MAP = {
@@ -26,16 +17,10 @@ const BADGE_MAP = {
   pending:  '<span class="badge badge-pending">○ ยังไม่เริ่ม</span>',
 };
 
-
-/* ============================================================
-   A. renderBudgetRows — โหลดจาก DB และ render ตาราง
-   ============================================================ */
 async function renderBudgetRows() {
-  const tbody   = document.getElementById('budgetBody');
+  const tbody = document.getElementById('budgetBody');
   tbody.innerHTML = '';
 
-  // โหลดครั้งแรก (flag 'budgetSeeded') → ใช้ seed data
-  // ถ้าลบหมดแล้ว (seeded=true, data=[]) → แสดง empty state ไม่ reset
   const hasSeeded = await DB.get('budgetSeeded');
   if (!hasSeeded) {
     await DB.set('budgetData',   SEED_BUDGET_DATA);
@@ -43,66 +28,58 @@ async function renderBudgetRows() {
   }
 
   const data = (await DB.get('budgetData')) || [];
-  data.forEach((item, index) => {
-    tbody.appendChild(buildBudgetRow(item, index + 1));
-  });
-
+  data.forEach((item, index) => tbody.appendChild(buildBudgetRow(item, index + 1)));
   toggleBudgetEmpty();
 }
 
-
-/* ============================================================
-   B. buildBudgetRow — สร้าง <tr> จาก item object
-   ============================================================ */
 function buildBudgetRow(item, rowNum) {
   const tr = document.createElement('tr');
 
-  const tdNum = document.createElement('td');
+  const tdNum    = document.createElement('td');
   tdNum.textContent = rowNum;
 
-  const tdName = document.createElement('td');
-  tdName.textContent = item.name; // textContent — XSS safe
+  const tdName   = document.createElement('td');
+  tdName.textContent = item.name;
 
   const tdAmount = document.createElement('td');
   tdAmount.textContent = Number(item.amount).toLocaleString('th-TH');
 
+  // วันที่ (ถ้ามี)
+  const tdDate   = document.createElement('td');
+  tdDate.textContent = item.dateDisplay || '—';
+
   const tdStatus = document.createElement('td');
-  tdStatus.innerHTML = BADGE_MAP[item.status] || BADGE_MAP.pending; // our own HTML only
+  tdStatus.innerHTML = BADGE_MAP[item.status] || BADGE_MAP.pending;
 
   const tdAction = document.createElement('td');
   tdAction.className = 'admin-only-td';
-  if (document.body.classList.contains('admin-active')) tdAction.style.display = 'table-cell';
-
   const delBtn = document.createElement('button');
-  delBtn.className  = 'btn btn-red';
+  delBtn.className   = 'btn btn-red';
   delBtn.textContent = 'ลบ';
-  delBtn.onclick    = () => deleteRow(delBtn);
+  delBtn.onclick     = () => deleteBudgetRow(delBtn);
   tdAction.appendChild(delBtn);
 
-  tr.append(tdNum, tdName, tdAmount, tdStatus, tdAction);
+  tr.append(tdNum, tdName, tdAmount, tdDate, tdStatus, tdAction);
   return tr;
 }
 
-
-/* ============================================================
-   C. addBudgetRow — validate + บันทึก + render
-   ============================================================ */
 async function addBudgetRow() {
   const nameInput   = document.getElementById('bName');
   const amountInput = document.getElementById('bAmount');
   const statusSel   = document.getElementById('bStatus');
+  const dateInput   = document.getElementById('bDate');
   const nameErr     = document.getElementById('bNameError');
   const amountErr   = document.getElementById('bAmountError');
 
   nameErr.classList.remove('show');
   amountErr.classList.remove('show');
 
-  const name   = nameInput.value.trim();
-  const amount = amountInput.value.trim();
-  const status = statusSel.value;
+  const name      = nameInput.value.trim();
+  const amount    = amountInput.value.trim();
+  const status    = statusSel.value;
+  const dateVal   = dateInput ? dateInput.value : '';
 
   let valid = true;
-
   if (!name) {
     nameErr.textContent = 'กรุณากรอกชื่อกิจกรรม';
     nameErr.classList.add('show');
@@ -110,110 +87,81 @@ async function addBudgetRow() {
   }
 
   const amountNum = parseFloat(amount);
-  if (!amount || isNaN(amountNum) || amountNum <= 0 || !Number.isFinite(amountNum)) {
-    amountErr.textContent = 'กรุณากรอกจำนวนเงินที่ถูกต้อง (ตัวเลขบวกเท่านั้น)';
+  if (!amount || isNaN(amountNum) || amountNum <= 0) {
+    amountErr.textContent = 'กรุณากรอกจำนวนเงินที่ถูกต้อง';
     amountErr.classList.add('show');
     valid = false;
   }
-
-  if (amountNum > 99999999) {
+  if (valid && amountNum > 99999999) {
     amountErr.textContent = 'จำนวนเงินเกินขีดจำกัด (สูงสุด 99,999,999 บาท)';
     amountErr.classList.add('show');
     valid = false;
   }
-
   if (!valid) return;
 
-  // บันทึกลง DB
+  // แปลง date → display string
+  const dateDisplay = dateVal ? formatDateDisplay(dateVal) : '—';
+
+  const newItem = { name, amount: Math.round(amountNum), status, dateDisplay };
   const data    = (await DB.get('budgetData')) || [];
-  const newItem = { name, amount: Math.round(amountNum), status };
   data.push(newItem);
   await DB.set('budgetData', data);
 
-  // Render ใหม่ทั้งหมด (เพื่อให้เลข # ถูกต้อง)
-  renderBudgetRows();
-
+  await renderBudgetRows();
   await addLog('เพิ่มรายการงบประมาณ: ' + name);
   closeBudgetModal();
-  showToast('✅ เพิ่มรายการงบประมาณสำเร็จ', 'success');
+
+  // แจ้งเตือน
+  await notifyBudget(newItem);
 }
 
-
-/* ============================================================
-   D. deleteRow — ยืนยัน + ลบจาก DB + render ใหม่
-   ============================================================ */
-function deleteRow(btn) {
+function deleteBudgetRow(btn) {
   if (!isAdmin) return;
-
   const tr      = btn.closest('tr');
-  const tbody   = document.getElementById('budgetBody');
-  const rows    = Array.from(tbody.querySelectorAll('tr'));
-  const rowIndex = rows.indexOf(tr);
+  const rows    = Array.from(document.getElementById('budgetBody').querySelectorAll('tr'));
+  const rowIdx  = rows.indexOf(tr);
 
-  showConfirm(
-    'ต้องการลบรายการงบประมาณนี้?',
-    async () => {
-      const data = (await DB.get('budgetData')) || [];
-      data.splice(rowIndex, 1);
-      await DB.set('budgetData', data);
-      await renderBudgetRows();
-      showToast('🗑️ ลบรายการเรียบร้อยแล้ว');
-    },
-    '🗑️',
-    'ลบรายการงบประมาณ'
-  );
+  showConfirm('ต้องการลบรายการงบประมาณนี้?', async () => {
+    const data = (await DB.get('budgetData')) || [];
+    data.splice(rowIdx, 1);
+    await DB.set('budgetData', data);
+    await renderBudgetRows();
+    showToast('🗑️ ลบรายการเรียบร้อยแล้ว');
+  }, '🗑️', 'ลบรายการงบประมาณ');
 }
 
-
-/* ============================================================
-   E. toggleBudgetEmpty — แสดง/ซ่อน empty state
-   ============================================================ */
 function toggleBudgetEmpty() {
   const tbody   = document.getElementById('budgetBody');
   const emptyEl = document.getElementById('budgetEmpty');
   const tableEl = document.getElementById('budgetTable');
   if (!emptyEl) return;
-
   const isEmpty = tbody.querySelectorAll('tr').length === 0;
   emptyEl.style.display = isEmpty ? 'block' : 'none';
   if (tableEl) tableEl.style.display = isEmpty ? 'none' : 'table';
 }
 
-
-/* ============================================================
-   F. closeBudgetModal — ปิด + reset form
-   ============================================================ */
 function closeBudgetModal() {
-  document.getElementById('bName').value    = '';
-  document.getElementById('bAmount').value  = '';
+  ['bName','bAmount'].forEach(id => { document.getElementById(id).value = ''; });
+  const bDate = document.getElementById('bDate');
+  if (bDate) bDate.value = '';
   document.getElementById('bStatus').selectedIndex = 0;
   document.getElementById('bNameError').classList.remove('show');
   document.getElementById('bAmountError').classList.remove('show');
   closeModal('addBudget');
 }
 
-
-/* ============================================================
-   G. Input Guards — block non-numeric ในช่องงบประมาณ
-   ============================================================ */
+// Block non-numeric
 document.addEventListener('DOMContentLoaded', () => {
   const amountInput = document.getElementById('bAmount');
   if (!amountInput) return;
-
-  // Block ตัวอักษรที่ไม่ใช่ตัวเลข
-  amountInput.addEventListener('keydown', function (e) {
-    const controlKeys = ['Backspace','Delete','Tab','ArrowLeft','ArrowRight','Enter','Home','End'];
-    const isDigit     = (e.key >= '0' && e.key <= '9');
-    const isControl   = controlKeys.includes(e.key);
-    const isShortcut  = e.ctrlKey || e.metaKey;
-    if (!isDigit && !isControl && !isShortcut) e.preventDefault();
+  amountInput.addEventListener('keydown', e => {
+    const allowed = ['Backspace','Delete','Tab','ArrowLeft','ArrowRight','Enter','Home','End'];
+    if (!(e.key >= '0' && e.key <= '9') && !allowed.includes(e.key) && !e.ctrlKey && !e.metaKey)
+      e.preventDefault();
   });
-
-  // Paste protection — กรอง paste ที่ไม่ใช่ตัวเลข
-  amountInput.addEventListener('paste', function (e) {
+  amountInput.addEventListener('paste', e => {
     e.preventDefault();
-    const text    = (e.clipboardData || window.clipboardData).getData('text');
-    const cleaned = text.replace(/[^0-9]/g, '');
+    const cleaned = (e.clipboardData || window.clipboardData).getData('text').replace(/[^0-9]/g, '');
     if (cleaned) document.execCommand('insertText', false, cleaned);
   });
 });

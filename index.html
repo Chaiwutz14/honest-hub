@@ -3,43 +3,36 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- SEO & Social Meta -->
   <title>HONEST HUB — โรงเรียนเทศบาลจุ่งฮั่ว จังหวัดพัทลุง</title>
-  <meta name="description" content="ศูนย์กลางความโปร่งใสโรงเรียนเทศบาลจุ่งฮั่ว จังหวัดพัทลุง รวบรวมข้อมูลงบประมาณ กิจกรรม และช่องทางแสดงความคิดเห็น">
-  <meta name="keywords" content="โรงเรียนเทศบาลจุ่งฮั่ว, พัทลุง, ความโปร่งใส, งบประมาณ">
-  <meta name="author" content="โรงเรียนเทศบาลจุ่งฮั่ว">
-  <meta property="og:title" content="HONEST HUB — โรงเรียนเทศบาลจุ่งฮั่ว">
+  <meta name="description" content="ศูนย์กลางความโปร่งใสโรงเรียนเทศบาลจุ่งฮั่ว จังหวัดพัทลุง">
+  <meta name="author"      content="โรงเรียนเทศบาลจุ่งฮั่ว">
+  <meta property="og:title"       content="HONEST HUB — โรงเรียนเทศบาลจุ่งฮั่ว">
   <meta property="og:description" content="ศูนย์กลางความโปร่งใสโรงเรียนเทศบาลจุ่งฮั่ว จังหวัดพัทลุง">
-  <meta property="og:type" content="website">
-  <meta property="og:locale" content="th_TH">
-
-  <!-- Favicon -->
+  <meta property="og:type"        content="website">
+  <meta property="og:locale"      content="th_TH">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏫</text></svg>">
-
-  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
-
-  <!-- Stylesheet -->
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-  <!-- =====================================================
-       TOAST CONTAINER
-       ===================================================== -->
+  <!-- Toast -->
   <div id="toastContainer" role="status" aria-live="polite"></div>
 
-  <!-- =====================================================
-       CUSTOM CONFIRM DIALOG
-       ===================================================== -->
+  <!-- Urgent Banner (แสดงเมื่อมีประกาศด่วน) -->
+  <div id="urgentBanner" role="alert">
+    <span class="urgent-label">🔴 ด่วน</span>
+    <span class="urgent-text"></span>
+  </div>
+
+  <!-- Custom Confirm -->
   <div class="modal-overlay" id="modal-confirm">
     <div class="modal modal--sm">
-      <div class="confirm-icon" id="confirmIcon">⚠️</div>
+      <div class="confirm-icon"  id="confirmIcon">⚠️</div>
       <div class="confirm-title" id="confirmTitle">ยืนยันการดำเนินการ</div>
-      <div class="confirm-msg" id="confirmMsg">คุณต้องการดำเนินการนี้ใช่หรือไม่?</div>
+      <div class="confirm-msg"   id="confirmMsg"></div>
       <div class="modal-footer modal-footer--center">
         <button class="btn btn-outline" id="confirmCancelBtn">ยกเลิก</button>
         <button class="btn btn-red"     id="confirmOkBtn">ยืนยัน</button>
@@ -47,57 +40,52 @@
     </div>
   </div>
 
-  <!-- =====================================================
-       ADMIN BAR
-       ===================================================== -->
+  <!-- Admin Bar -->
   <div id="adminBar" role="alert">
     <span>🔑 โหมดผู้ดูแลระบบ — คุณมีสิทธิ์แก้ไขข้อมูลทั้งหมด</span>
-    <button onclick="adminLogout()" aria-label="ออกจากระบบผู้ดูแล">ออกจากระบบ ×</button>
+    <button onclick="adminLogout()">ออกจากระบบ ×</button>
   </div>
 
-  <!-- =====================================================
-       NAVIGATION
-       ===================================================== -->
+  <!-- NAV -->
   <nav role="navigation" aria-label="เมนูหลัก">
-    <a class="nav-logo" onclick="showPage('home')" role="button" tabindex="0"
-       aria-label="กลับหน้าหลัก HONEST HUB">HONEST HUB</a>
-
+    <a class="nav-logo" onclick="showPage('home')" tabindex="0">HONEST HUB</a>
     <div class="nav-links" id="navLinks">
-      <a id="nav-home"      onclick="showPage('home')"      tabindex="0">🏠 หน้าหลัก</a>
-      <a id="nav-budget"    onclick="showPage('budget')"    tabindex="0">💰 Budget</a>
-      <a id="nav-activity"  onclick="showPage('activity')"  tabindex="0">📅 Activity</a>
-      <a id="nav-dashboard" onclick="showPage('dashboard')" tabindex="0">📊 Dashboard</a>
-      <a id="nav-voice"     onclick="showPage('voice')"     tabindex="0">💬 Voice</a>
-      <a id="nav-integrity" onclick="showPage('integrity')" tabindex="0">⭐ Integrity</a>
+      <a id="nav-home"         onclick="showPage('home')"         tabindex="0">🏠 หน้าหลัก</a>
+      <a id="nav-announcement" onclick="showPage('announcement')" tabindex="0">📢 ประกาศ</a>
+      <a id="nav-budget"       onclick="showPage('budget')"       tabindex="0">💰 Budget</a>
+      <a id="nav-activity"     onclick="showPage('activity')"     tabindex="0">📅 Activity</a>
+      <a id="nav-dashboard"    onclick="showPage('dashboard')"    tabindex="0">📊 Dashboard</a>
+      <a id="nav-voice"        onclick="showPage('voice')"        tabindex="0">💬 Voice</a>
+      <a id="nav-integrity"    onclick="showPage('integrity')"    tabindex="0">⭐ Integrity</a>
     </div>
-
-    <button class="hamburger" id="hamburgerBtn"
-            onclick="toggleMobileMenu()"
-            aria-label="เปิด/ปิดเมนู"
-            aria-expanded="false"
-            aria-controls="mobileMenu">
-      <span></span><span></span><span></span>
-    </button>
+    <!-- nav-right: theme + hamburger ชิดกัน -->
+    <div class="nav-right">
+      <!-- Theme switcher จะถูกแทรกที่นี่โดย theme.js -->
+      <button class="hamburger" id="hamburgerBtn"
+              onclick="toggleMobileMenu()"
+              aria-label="เปิด/ปิดเมนู"
+              aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
   </nav>
 
   <!-- Mobile Menu -->
-  <div class="mobile-menu" id="mobileMenu" role="navigation" aria-label="เมนูมือถือ">
-    <a id="mnav-home"      onclick="showPage('home');      closeMobileMenu()" tabindex="0">🏠 หน้าหลัก</a>
-    <a id="mnav-budget"    onclick="showPage('budget');    closeMobileMenu()" tabindex="0">💰 Budget Hub</a>
-    <a id="mnav-activity"  onclick="showPage('activity');  closeMobileMenu()" tabindex="0">📅 Activity Hub</a>
-    <a id="mnav-dashboard" onclick="showPage('dashboard'); closeMobileMenu()" tabindex="0">📊 Dashboard</a>
-    <a id="mnav-voice"     onclick="showPage('voice');     closeMobileMenu()" tabindex="0">💬 Voice Hub</a>
-    <a id="mnav-integrity" onclick="showPage('integrity'); closeMobileMenu()" tabindex="0">⭐ Integrity Hub</a>
+  <div class="mobile-menu" id="mobileMenu">
+    <a id="mnav-home"         onclick="showPage('home');         closeMobileMenu()">🏠 หน้าหลัก</a>
+    <a id="mnav-announcement" onclick="showPage('announcement'); closeMobileMenu()">📢 ประกาศ</a>
+    <a id="mnav-budget"       onclick="showPage('budget');       closeMobileMenu()">💰 Budget Hub</a>
+    <a id="mnav-activity"     onclick="showPage('activity');     closeMobileMenu()">📅 Activity Hub</a>
+    <a id="mnav-dashboard"    onclick="showPage('dashboard');    closeMobileMenu()">📊 Dashboard</a>
+    <a id="mnav-voice"        onclick="showPage('voice');        closeMobileMenu()">💬 Voice Hub</a>
+    <a id="mnav-integrity"    onclick="showPage('integrity');    closeMobileMenu()">⭐ Integrity Hub</a>
   </div>
 
-  <!-- =====================================================
-       PAGE: HOME
-       ===================================================== -->
+  <!-- ==================== PAGE: HOME ==================== -->
   <div id="home" class="page active">
     <div class="hero-wrapper">
-      <div class="hero-bg" aria-hidden="true"></div>
+      <div class="hero-bg"      aria-hidden="true"></div>
       <div class="grid-overlay" aria-hidden="true"></div>
-
       <div class="hero-content">
         <div class="hero-badge">ศูนย์กลางความโปร่งใส</div>
         <h1 class="hero-title">HONEST<br><span>HUB</span></h1>
@@ -105,65 +93,109 @@
         <div class="gold-line" aria-hidden="true"></div>
         <p class="hero-desc">
           แพลตฟอร์มกลางเพื่อความโปร่งใสของโรงเรียนเทศบาลจุ่งฮั่ว จังหวัดพัทลุง<br>
-          รวบรวมข้อมูลงบประมาณ กิจกรรม และช่องทางแสดงความคิดเห็นสำหรับชุมชนโรงเรียน<br>
-          เปิดเผย ตรวจสอบได้ และมีส่วนร่วมได้ในทุกมิติ
+          รวบรวมข้อมูลงบประมาณ กิจกรรม และช่องทางแสดงความคิดเห็นสำหรับชุมชนโรงเรียน
         </p>
       </div>
-
       <div class="hubs-section">
-        <div class="hubs-label" aria-hidden="true">— เลือกหัวข้อที่ต้องการ —</div>
-        <div class="hubs-grid" role="list">
-          <div class="hub-card" onclick="showPage('budget')"   role="listitem button" tabindex="0" aria-label="Budget Hub">
-            <div class="hub-icon" aria-hidden="true">💰</div>
+        <div class="hubs-label">— เลือกหัวข้อที่ต้องการ —</div>
+        <div class="hubs-grid">
+          <div class="hub-card" onclick="showPage('announcement')" tabindex="0">
+            <div class="hub-icon">📢</div>
+            <div class="hub-number">HUB 00</div>
+            <div class="hub-name">ประกาศ</div>
+            <div class="hub-desc">ข่าวสารและประกาศของโรงเรียนรายวัน</div>
+            <div class="hub-arrow">เข้าชม →</div>
+          </div>
+          <div class="hub-card" onclick="showPage('budget')" tabindex="0">
+            <div class="hub-icon">💰</div>
             <div class="hub-number">HUB 01</div>
             <div class="hub-name">Budget Hub</div>
             <div class="hub-desc">งบประมาณกิจกรรม ตรวจสอบสถานะการใช้งบ</div>
-            <div class="hub-arrow" aria-hidden="true">เข้าชม →</div>
+            <div class="hub-arrow">เข้าชม →</div>
           </div>
-          <div class="hub-card" onclick="showPage('activity')" role="listitem button" tabindex="0" aria-label="Activity Hub">
-            <div class="hub-icon" aria-hidden="true">📅</div>
+          <div class="hub-card" onclick="showPage('activity')" tabindex="0">
+            <div class="hub-icon">📅</div>
             <div class="hub-number">HUB 02</div>
             <div class="hub-name">Activity Hub</div>
             <div class="hub-desc">กิจกรรมของโรงเรียนทั้งหมด</div>
-            <div class="hub-arrow" aria-hidden="true">เข้าชม →</div>
+            <div class="hub-arrow">เข้าชม →</div>
           </div>
-          <div class="hub-card" onclick="showPage('dashboard')" role="listitem button" tabindex="0" aria-label="Dashboard">
-            <div class="hub-icon" aria-hidden="true">📊</div>
+          <div class="hub-card" onclick="showPage('dashboard')" tabindex="0">
+            <div class="hub-icon">📊</div>
             <div class="hub-number">HUB 03</div>
             <div class="hub-name">Dashboard</div>
             <div class="hub-desc">สถิติผู้เข้าชมและข้อเสนอแนะ</div>
-            <div class="hub-arrow" aria-hidden="true">เข้าชม →</div>
+            <div class="hub-arrow">เข้าชม →</div>
           </div>
-          <div class="hub-card" onclick="showPage('voice')"    role="listitem button" tabindex="0" aria-label="Voice Hub">
-            <div class="hub-icon" aria-hidden="true">💬</div>
+          <div class="hub-card" onclick="showPage('voice')" tabindex="0">
+            <div class="hub-icon">💬</div>
             <div class="hub-number">HUB 04</div>
             <div class="hub-name">Voice Hub</div>
             <div class="hub-desc">แสดงความคิดเห็น ข้อเสนอแนะ</div>
-            <div class="hub-arrow" aria-hidden="true">เข้าชม →</div>
+            <div class="hub-arrow">เข้าชม →</div>
           </div>
-          <div class="hub-card" onclick="showPage('integrity')" role="listitem button" tabindex="0" aria-label="Integrity Learning Hub">
-            <div class="hub-icon" aria-hidden="true">⭐</div>
+          <div class="hub-card" onclick="showPage('integrity')" tabindex="0">
+            <div class="hub-icon">⭐</div>
             <div class="hub-number">HUB 05</div>
-            <div class="hub-name">Integrity Learning Hub</div>
+            <div class="hub-name">Integrity Hub</div>
             <div class="hub-desc">ความรู้เรื่องความซื่อสัตย์และต้านทุจริต</div>
-            <div class="hub-arrow" aria-hidden="true">เข้าชม →</div>
+            <div class="hub-arrow">เข้าชม →</div>
           </div>
         </div>
       </div>
     </div>
     <footer class="footer">
-      <span>© 2569 HONEST HUB · โรงเรียนเทศบาลจุ่งฮั่ว จังหวัดพัทลุง</span>
-      <button class="admin-key-btn" onclick="openModal('adminLogin')" aria-label="เข้าสู่ระบบผู้ดูแล">เฉพาะผู้ดูแลระบบ 🔑</button>
+      <span>© 2567 HONEST HUB · โรงเรียนเทศบาลจุ่งฮั่ว จังหวัดพัทลุง</span>
+      <button class="admin-key-btn" onclick="openModal('adminLogin')">เฉพาะผู้ดูแลระบบ 🔑</button>
     </footer>
   </div>
 
-  <!-- =====================================================
-       PAGE: BUDGET HUB
-       ===================================================== -->
+  <!-- ==================== PAGE: ANNOUNCEMENT ==================== -->
+  <div id="announcement" class="page">
+    <div class="inner-page">
+      <div class="inner-header">
+        <button class="back-btn" onclick="showPage('home')">← กลับหน้าหลัก</button>
+        <h1><span>ประกาศ</span> และข่าวสาร</h1>
+        <p>ข่าวสารและประกาศของโรงเรียนเทศบาลจุ่งฮั่ว</p>
+      </div>
+      <div class="inner-body">
+        <h2 class="section-title">ประกาศทั้งหมด</h2>
+        <p class="section-sub">อัปเดตโดยผู้ดูแลระบบ · ประกาศที่หมดอายุจะถูกซ่อนอัตโนมัติ</p>
+
+        <div class="action-row">
+          <button class="btn btn-gold admin-only" onclick="openModal('addAnnouncement')">
+            + เพิ่มประกาศ
+          </button>
+        </div>
+
+        <!-- Filter bar -->
+        <div class="announce-filter">
+          <button class="announce-filter-btn active" onclick="filterAnnounce(this,'all')">ทั้งหมด</button>
+          <button class="announce-filter-btn" onclick="filterAnnounce(this,'urgent')">🔴 ด่วนมาก</button>
+          <button class="announce-filter-btn" onclick="filterAnnounce(this,'announce')">📌 ประกาศ</button>
+          <button class="announce-filter-btn" onclick="filterAnnounce(this,'activity')">📅 กิจกรรม</button>
+          <button class="announce-filter-btn" onclick="filterAnnounce(this,'mourning')">🎗️ ไว้อาลัย</button>
+          <button class="announce-filter-btn" onclick="filterAnnounce(this,'general')">ℹ️ ทั่วไป</button>
+        </div>
+
+        <div class="announce-grid" id="announcementGrid"></div>
+        <div class="empty-state" id="announceEmpty" style="display:none">
+          <div class="empty-icon">📢</div>
+          <div class="empty-text">ยังไม่มีประกาศในขณะนี้</div>
+        </div>
+      </div>
+    </div>
+    <footer class="footer">
+      <span>© 2567 HONEST HUB · โรงเรียนเทศบาลจุ่งฮั่ว จังหวัดพัทลุง</span>
+      <button class="admin-key-btn" onclick="openModal('adminLogin')">เฉพาะผู้ดูแลระบบ 🔑</button>
+    </footer>
+  </div>
+
+  <!-- ==================== PAGE: BUDGET ==================== -->
   <div id="budget" class="page">
     <div class="inner-page">
       <div class="inner-header">
-        <button class="back-btn" onclick="showPage('home')" aria-label="กลับหน้าหลัก">← กลับหน้าหลัก</button>
+        <button class="back-btn" onclick="showPage('home')">← กลับหน้าหลัก</button>
         <h1><span>Budget</span> Hub</h1>
         <p>งบประมาณกิจกรรมโรงเรียนเทศบาลจุ่งฮั่ว</p>
       </div>
@@ -171,19 +203,18 @@
         <h2 class="section-title">รายการงบประมาณกิจกรรม</h2>
         <p class="section-sub">แสดงงบประมาณกิจกรรมทั้งหมด อัปเดตโดยผู้ดูแลระบบ</p>
         <div class="action-row">
-          <button class="btn btn-gold admin-only" onclick="openModal('addBudget')" aria-label="เพิ่มรายการงบประมาณ">
-            + เพิ่มรายการงบประมาณ
-          </button>
+          <button class="btn btn-gold admin-only" onclick="openModal('addBudget')">+ เพิ่มรายการงบประมาณ</button>
         </div>
         <div class="table-scroll">
-          <table id="budgetTable" aria-label="ตารางงบประมาณกิจกรรม">
+          <table id="budgetTable" aria-label="ตารางงบประมาณ">
             <thead>
               <tr>
-                <th scope="col">#</th>
-                <th scope="col">ชื่อกิจกรรม</th>
-                <th scope="col">งบประมาณ (บาท)</th>
-                <th scope="col">สถานะ</th>
-                <th scope="col" class="admin-only-th">จัดการ</th>
+                <th>#</th>
+                <th>ชื่อกิจกรรม</th>
+                <th>งบประมาณ (บาท)</th>
+                <th>วันที่</th>
+                <th>สถานะ</th>
+                <th class="admin-only-th">จัดการ</th>
               </tr>
             </thead>
             <tbody id="budgetBody"></tbody>
@@ -196,18 +227,16 @@
       </div>
     </div>
     <footer class="footer">
-      <span>© 2569 HONEST HUB · โรงเรียนเทศบาลจุ่งฮั่ว จังหวัดพัทลุง</span>
-      <button class="admin-key-btn" onclick="openModal('adminLogin')" aria-label="เข้าสู่ระบบผู้ดูแล">เฉพาะผู้ดูแลระบบ 🔑</button>
+      <span>© 2567 HONEST HUB · โรงเรียนเทศบาลจุ่งฮั่ว จังหวัดพัทลุง</span>
+      <button class="admin-key-btn" onclick="openModal('adminLogin')">เฉพาะผู้ดูแลระบบ 🔑</button>
     </footer>
   </div>
 
-  <!-- =====================================================
-       PAGE: ACTIVITY HUB
-       ===================================================== -->
+  <!-- ==================== PAGE: ACTIVITY ==================== -->
   <div id="activity" class="page">
     <div class="inner-page">
       <div class="inner-header">
-        <button class="back-btn" onclick="showPage('home')" aria-label="กลับหน้าหลัก">← กลับหน้าหลัก</button>
+        <button class="back-btn" onclick="showPage('home')">← กลับหน้าหลัก</button>
         <h1><span>Activity</span> Hub</h1>
         <p>กิจกรรมปัจจุบันของโรงเรียนเทศบาลจุ่งฮั่ว</p>
       </div>
@@ -215,30 +244,26 @@
         <h2 class="section-title">กิจกรรมทั้งหมด</h2>
         <p class="section-sub">ข้อมูลกิจกรรมที่กำลังดำเนินการและกำลังจะมาถึง</p>
         <div class="action-row">
-          <button class="btn btn-gold admin-only" onclick="openModal('addActivity')" aria-label="เพิ่มกิจกรรม">
-            + เพิ่มกิจกรรม
-          </button>
+          <button class="btn btn-gold admin-only" onclick="openModal('addActivity')">+ เพิ่มกิจกรรม</button>
         </div>
         <div class="activity-grid" id="activityGrid" role="list"></div>
         <div class="empty-state" id="activityEmpty" style="display:none">
           <div class="empty-icon">📅</div>
-          <div class="empty-text">ยังไม่มีกิจกรรม</div>
+          <div class="empty-text">ยังไม่มีกิจกรรมในขณะนี้</div>
         </div>
       </div>
     </div>
     <footer class="footer">
-      <span>© 2569 HONEST HUB · โรงเรียนเทศบาลจุ่งฮั่ว จังหวัดพัทลุง</span>
-      <button class="admin-key-btn" onclick="openModal('adminLogin')" aria-label="เข้าสู่ระบบผู้ดูแล">เฉพาะผู้ดูแลระบบ 🔑</button>
+      <span>© 2567 HONEST HUB · โรงเรียนเทศบาลจุ่งฮั่ว จังหวัดพัทลุง</span>
+      <button class="admin-key-btn" onclick="openModal('adminLogin')">เฉพาะผู้ดูแลระบบ 🔑</button>
     </footer>
   </div>
 
-  <!-- =====================================================
-       PAGE: DASHBOARD
-       ===================================================== -->
+  <!-- ==================== PAGE: DASHBOARD ==================== -->
   <div id="dashboard" class="page">
     <div class="inner-page">
       <div class="inner-header">
-        <button class="back-btn" onclick="showPage('home')" aria-label="กลับหน้าหลัก">← กลับหน้าหลัก</button>
+        <button class="back-btn" onclick="showPage('home')">← กลับหน้าหลัก</button>
         <h1><span>Dashboard</span></h1>
         <p>สถิติและข้อมูลเว็บไซต์แบบเรียลไทม์</p>
       </div>
@@ -253,7 +278,7 @@
           </div>
           <div class="dash-card dash-card--green">
             <div class="dash-num" id="suggestionCount">0</div>
-            <div class="dash-label">💬 ข้อเสนอแนะทั้งหมด</div>
+            <div class="dash-label">💬 ความคิดเห็นทั้งหมด</div>
             <div class="dash-trend" id="suggTrend">กำลังรอข้อมูล...</div>
           </div>
           <div class="dash-card dash-card--blue">
@@ -264,7 +289,12 @@
           <div class="dash-card dash-card--red">
             <div class="dash-num" id="budgetCount">0</div>
             <div class="dash-label">💰 รายการงบประมาณ</div>
-            <div class="dash-trend">ปีงบประมาณ 2569</div>
+            <div class="dash-trend">ปีงบประมาณ 2568</div>
+          </div>
+          <div class="dash-card dash-card--announce">
+            <div class="dash-num" id="announceCount">0</div>
+            <div class="dash-label">📢 ประกาศทั้งหมด</div>
+            <div class="dash-trend">อัปเดตโดยผู้ดูแลระบบ</div>
           </div>
         </div>
         <div class="chart-panel">
@@ -274,30 +304,25 @@
       </div>
     </div>
     <footer class="footer">
-      <span>© 2569 HONEST HUB · โรงเรียนเทศบาลจุ่งฮั่ว จังหวัดพัทลุง</span>
-      <button class="admin-key-btn" onclick="openModal('adminLogin')" aria-label="เข้าสู่ระบบผู้ดูแล">เฉพาะผู้ดูแลระบบ 🔑</button>
+      <span>© 2567 HONEST HUB · โรงเรียนเทศบาลจุ่งฮั่ว จังหวัดพัทลุง</span>
+      <button class="admin-key-btn" onclick="openModal('adminLogin')">เฉพาะผู้ดูแลระบบ 🔑</button>
     </footer>
   </div>
 
-  <!-- =====================================================
-       PAGE: VOICE HUB
-       ===================================================== -->
+  <!-- ==================== PAGE: VOICE ==================== -->
   <div id="voice" class="page">
     <div class="inner-page">
       <div class="inner-header">
-        <button class="back-btn" onclick="showPage('home')" aria-label="กลับหน้าหลัก">← กลับหน้าหลัก</button>
+        <button class="back-btn" onclick="showPage('home')">← กลับหน้าหลัก</button>
         <h1><span>Voice</span> Hub</h1>
         <p>แสดงความคิดเห็นและข้อเสนอแนะ</p>
       </div>
       <div class="inner-body">
-        <div class="voice-form-panel" role="form" aria-label="ฟอร์มแสดงความคิดเห็น">
+        <div class="voice-form-panel">
           <h2 class="section-title" style="margin-bottom:22px;">✍️ แสดงความคิดเห็น</h2>
-
           <div class="form-group">
             <label for="commentName">ชื่อ (หรือนิรนาม)</label>
-            <input type="text" id="commentName"
-                   placeholder="ระบุชื่อ หรือเว้นว่างเพื่อไม่ระบุตัวตน"
-                   maxlength="60" autocomplete="off">
+            <input type="text" id="commentName" placeholder="ระบุชื่อ หรือเว้นว่างเพื่อไม่ระบุตัวตน" maxlength="60" autocomplete="off">
           </div>
           <div class="form-group">
             <label for="commentCat">หมวดหมู่</label>
@@ -310,29 +335,17 @@
             </select>
           </div>
           <div class="form-group">
-            <label for="commentText">ความคิดเห็น <span class="required" aria-label="จำเป็น">*</span></label>
-            <textarea id="commentText" rows="4"
-                      placeholder="พิมพ์ความคิดเห็นของคุณ..."
-                      maxlength="500"
-                      aria-describedby="commentCharCount commentTextError"></textarea>
-            <div id="commentCharCount" class="char-count" aria-live="polite">0 / 500 ตัวอักษร</div>
+            <label for="commentText">ความคิดเห็น <span class="required">*</span></label>
+            <textarea id="commentText" rows="4" placeholder="พิมพ์ความคิดเห็นของคุณ..." maxlength="500"></textarea>
+            <div id="commentCharCount" class="char-count">0 / 500 ตัวอักษร</div>
             <div class="form-error" id="commentTextError" role="alert"></div>
           </div>
-
-          <!-- Rate limit countdown -->
-          <div class="cooldown-bar" id="cooldownBar" style="display:none" aria-live="polite">
-            <span>⏳ กรุณารอ <strong id="cooldownTimer">30</strong> วินาที ก่อนส่งความคิดเห็นถัดไป</span>
+          <div class="cooldown-bar" id="cooldownBar" style="display:none">
+            <span>⏳ กรุณารอ <strong id="cooldownTimer">30</strong> วินาที ก่อนส่งอีกครั้ง</span>
           </div>
-
-          <button class="btn btn-gold" id="submitCommentBtn" onclick="submitComment()" aria-label="ส่งความคิดเห็น">
-            📨 ส่งความคิดเห็น
-          </button>
-          <p class="form-note">
-            * ความคิดเห็นจะถูกแจ้งเตือนไปยังผู้ดูแลระบบทันที<br>
-            * ระบบกรองข้อความที่ไม่เหมาะสมโดยอัตโนมัติ
-          </p>
+          <button class="btn btn-gold" id="submitCommentBtn" onclick="submitComment()">📨 ส่งความคิดเห็น</button>
+          <p class="form-note">* ความคิดเห็นจะถูกแจ้งเตือนไปยังผู้ดูแลระบบทันที</p>
         </div>
-
         <h2 class="section-title">ความคิดเห็นทั้งหมด</h2>
         <p class="section-sub" id="commentCountLabel">กำลังโหลด...</p>
         <div class="comment-list" id="commentList" role="list"></div>
@@ -343,18 +356,16 @@
       </div>
     </div>
     <footer class="footer">
-      <span>© 2569 HONEST HUB · โรงเรียนเทศบาลจุ่งฮั่ว จังหวัดพัทลุง</span>
-      <button class="admin-key-btn" onclick="openModal('adminLogin')" aria-label="เข้าสู่ระบบผู้ดูแล">เฉพาะผู้ดูแลระบบ 🔑</button>
+      <span>© 2567 HONEST HUB · โรงเรียนเทศบาลจุ่งฮั่ว จังหวัดพัทลุง</span>
+      <button class="admin-key-btn" onclick="openModal('adminLogin')">เฉพาะผู้ดูแลระบบ 🔑</button>
     </footer>
   </div>
 
-  <!-- =====================================================
-       PAGE: INTEGRITY HUB
-       ===================================================== -->
+  <!-- ==================== PAGE: INTEGRITY ==================== -->
   <div id="integrity" class="page">
     <div class="inner-page">
       <div class="inner-header">
-        <button class="back-btn" onclick="showPage('home')" aria-label="กลับหน้าหลัก">← กลับหน้าหลัก</button>
+        <button class="back-btn" onclick="showPage('home')">← กลับหน้าหลัก</button>
         <h1><span>Integrity</span> Learning Hub</h1>
         <p>ความรู้เรื่องความซื่อสัตย์สุจริตและการต้านทุจริต</p>
       </div>
@@ -363,37 +374,37 @@
         <p class="section-sub">สื่อการเรียนรู้เพื่อสร้างวัฒนธรรมความซื่อสัตย์</p>
         <div class="integrity-grid">
           <article class="integrity-card">
-            <div class="integrity-icon" aria-hidden="true">🔍</div>
+            <div class="integrity-icon">🔍</div>
             <h3 class="integrity-title">การทุจริตคืออะไร?</h3>
             <p class="integrity-text">การทุจริตคือการใช้อำนาจหน้าที่เพื่อประโยชน์ส่วนตน ซึ่งส่งผลเสียต่อสังคมส่วนรวม ทั้งในด้านทรัพยากร ความไว้วางใจ และความยุติธรรม</p>
             <span class="integrity-tag">📖 บทเรียนพื้นฐาน</span>
           </article>
           <article class="integrity-card">
-            <div class="integrity-icon" aria-hidden="true">⚖️</div>
+            <div class="integrity-icon">⚖️</div>
             <h3 class="integrity-title">หลักความซื่อสัตย์สุจริต</h3>
             <p class="integrity-text">ความซื่อสัตย์สุจริตประกอบด้วย ความตรงไปตรงมา การรักษาคำพูด และการปฏิบัติตามกฎระเบียบอย่างเสมอต้นเสมอปลาย</p>
             <span class="integrity-tag">🌟 คุณธรรมหลัก</span>
           </article>
           <article class="integrity-card">
-            <div class="integrity-icon" aria-hidden="true">🛡️</div>
+            <div class="integrity-icon">🛡️</div>
             <h3 class="integrity-title">การป้องกันการทุจริตในโรงเรียน</h3>
             <p class="integrity-text">วิธีการป้องกัน เช่น การเปิดเผยข้อมูลงบประมาณ การมีระบบตรวจสอบ และการปลูกฝังค่านิยมที่ดีตั้งแต่วัยเรียน</p>
             <span class="integrity-tag">🏫 ระดับโรงเรียน</span>
           </article>
           <article class="integrity-card">
-            <div class="integrity-icon" aria-hidden="true">📢</div>
+            <div class="integrity-icon">📢</div>
             <h3 class="integrity-title">ผู้แจ้งเบาะแส (Whistleblower)</h3>
             <p class="integrity-text">การแจ้งเบาะแสการทุจริตเป็นหน้าที่ของพลเมืองที่ดี มีกฎหมายคุ้มครองผู้แจ้งเบาะแสในประเทศไทยเพื่อสร้างความมั่นใจ</p>
             <span class="integrity-tag">🔔 การมีส่วนร่วม</span>
           </article>
           <article class="integrity-card">
-            <div class="integrity-icon" aria-hidden="true">🌱</div>
+            <div class="integrity-icon">🌱</div>
             <h3 class="integrity-title">การปลูกฝังค่านิยมในเด็ก</h3>
             <p class="integrity-text">เด็กที่ได้รับการปลูกฝังค่านิยมความซื่อสัตย์จะเติบโตเป็นผู้ใหญ่ที่มีคุณภาพ ส่งผลดีต่อสังคมและประเทศชาติในระยะยาว</p>
             <span class="integrity-tag">👶 เยาวชน</span>
           </article>
           <article class="integrity-card">
-            <div class="integrity-icon" aria-hidden="true">📊</div>
+            <div class="integrity-icon">📊</div>
             <h3 class="integrity-title">ดัชนีชี้วัดความโปร่งใส</h3>
             <p class="integrity-text">ดัชนีการรับรู้การทุจริต (CPI) ของ Transparency International วัดระดับความโปร่งใสในภาครัฐ ประเทศไทยอยู่ในอันดับที่ต้องพัฒนาต่อเนื่อง</p>
             <span class="integrity-tag">🌍 ระดับสากล</span>
@@ -402,31 +413,34 @@
       </div>
     </div>
     <footer class="footer">
-      <span>© 2569 HONEST HUB · โรงเรียนเทศบาลจุ่งฮั่ว จังหวัดพัทลุง</span>
-      <button class="admin-key-btn" onclick="openModal('adminLogin')" aria-label="เข้าสู่ระบบผู้ดูแล">เฉพาะผู้ดูแลระบบ 🔑</button>
+      <span>© 2567 HONEST HUB · โรงเรียนเทศบาลจุ่งฮั่ว จังหวัดพัทลุง</span>
+      <button class="admin-key-btn" onclick="openModal('adminLogin')">เฉพาะผู้ดูแลระบบ 🔑</button>
     </footer>
   </div>
 
-  <!-- =====================================================
-       MODALS
-       ===================================================== -->
+  <!-- ==================== MODALS ==================== -->
 
   <!-- Modal: Add Budget -->
-  <div class="modal-overlay" id="modal-addBudget" role="dialog" aria-modal="true" aria-labelledby="modalBudgetTitle">
+  <div class="modal-overlay" id="modal-addBudget" role="dialog" aria-modal="true">
     <div class="modal">
-      <h3 id="modalBudgetTitle">+ เพิ่มรายการงบประมาณ</h3>
+      <h3>+ เพิ่มรายการงบประมาณ</h3>
       <div class="form-group">
-        <label for="bName">ชื่อกิจกรรม <span class="required">*</span></label>
+        <label>ชื่อกิจกรรม <span class="required">*</span></label>
         <input type="text" id="bName" placeholder="ระบุชื่อกิจกรรม" maxlength="100" autocomplete="off">
-        <div class="form-error" id="bNameError" role="alert"></div>
+        <div class="form-error" id="bNameError"></div>
       </div>
       <div class="form-group">
-        <label for="bAmount">งบประมาณ (บาท) <span class="required">*</span></label>
+        <label>งบประมาณ (บาท) <span class="required">*</span></label>
         <input type="number" id="bAmount" placeholder="เช่น 15000" min="1" max="99999999" step="1" autocomplete="off">
-        <div class="form-error" id="bAmountError" role="alert"></div>
+        <div class="form-error" id="bAmountError"></div>
       </div>
       <div class="form-group">
-        <label for="bStatus">สถานะ</label>
+        <label>วันที่ดำเนินการ</label>
+        <input type="date" id="bDate" data-datepicker>
+        <small style="color:var(--gray);font-size:0.74rem;">เลือกวันที่แน่นอน หรือเว้นว่างถ้าระบุแค่เดือน</small>
+      </div>
+      <div class="form-group">
+        <label>สถานะ</label>
         <select id="bStatus">
           <option value="done">✓ เสร็จสิ้น</option>
           <option value="progress">⟳ กำลังดำเนินการ</option>
@@ -441,24 +455,25 @@
   </div>
 
   <!-- Modal: Add Activity -->
-  <div class="modal-overlay" id="modal-addActivity" role="dialog" aria-modal="true" aria-labelledby="modalActivityTitle">
+  <div class="modal-overlay" id="modal-addActivity" role="dialog" aria-modal="true">
     <div class="modal">
-      <h3 id="modalActivityTitle">+ เพิ่มกิจกรรม</h3>
+      <h3>+ เพิ่มกิจกรรม</h3>
       <div class="form-group">
-        <label for="aName">ชื่อกิจกรรม <span class="required">*</span></label>
+        <label>ชื่อกิจกรรม <span class="required">*</span></label>
         <input type="text" id="aName" placeholder="ระบุชื่อกิจกรรม" maxlength="100" autocomplete="off">
-        <div class="form-error" id="aNameError" role="alert"></div>
+        <div class="form-error" id="aNameError"></div>
       </div>
       <div class="form-group">
-        <label for="aDesc">รายละเอียด</label>
+        <label>รายละเอียด</label>
         <textarea id="aDesc" rows="3" placeholder="อธิบายกิจกรรม..." maxlength="300"></textarea>
       </div>
       <div class="form-group">
-        <label for="aDate">วันที่ / ช่วงเวลา</label>
-        <input type="text" id="aDate" placeholder="เช่น มิถุนายน 9" maxlength="50" autocomplete="off">
+        <label>วันที่จัดกิจกรรม</label>
+        <input type="date" id="aDate" data-datepicker>
+        <small style="color:var(--gray);font-size:0.74rem;">เลือกวันที่แน่นอน หรือเว้นว่างถ้าระบุแค่เดือน</small>
       </div>
       <div class="form-group">
-        <label for="aStatus">สถานะ</label>
+        <label>สถานะ</label>
         <select id="aStatus">
           <option value="ongoing">กำลังดำเนินการ</option>
           <option value="upcoming">กำลังจะมาถึง</option>
@@ -472,22 +487,57 @@
     </div>
   </div>
 
+  <!-- Modal: Add Announcement -->
+  <div class="modal-overlay" id="modal-addAnnouncement" role="dialog" aria-modal="true">
+    <div class="modal">
+      <h3>📢 เพิ่มประกาศ</h3>
+      <div class="form-group">
+        <label>ประเภทประกาศ</label>
+        <select id="anType">
+          <option value="urgent">🔴 ด่วนมาก</option>
+          <option value="announce" selected>📌 ประกาศ</option>
+          <option value="activity">📅 กิจกรรม</option>
+          <option value="mourning">🎗️ ไว้อาลัย</option>
+          <option value="general">ℹ️ ทั่วไป</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>หัวข้อประกาศ <span class="required">*</span></label>
+        <input type="text" id="anTitle" placeholder="เช่น โรงเรียนหยุดพิเศษวันที่ 5 มิ.ย." maxlength="150" autocomplete="off">
+        <div class="form-error" id="anTitleError"></div>
+      </div>
+      <div class="form-group">
+        <label>รายละเอียด</label>
+        <textarea id="anBody" rows="3" placeholder="รายละเอียดเพิ่มเติม..." maxlength="500"></textarea>
+      </div>
+      <div class="form-group">
+        <label>วันที่ประกาศ</label>
+        <input type="date" id="anDate" data-datepicker>
+      </div>
+      <div class="form-group">
+        <label>วันหมดอายุ (ไม่กรอก = แสดงตลอด)</label>
+        <input type="date" id="anExpire" data-datepicker>
+        <small style="color:var(--gray);font-size:0.74rem;">ประกาศจะถูกซ่อนอัตโนมัติหลังวันนี้</small>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeAnnounceModal()">ยกเลิก</button>
+        <button class="btn btn-gold"    onclick="addAnnouncement()">📢 เผยแพร่</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal: Admin Login -->
-  <div class="modal-overlay" id="modal-adminLogin" role="dialog" aria-modal="true" aria-labelledby="adminLoginTitle">
+  <div class="modal-overlay" id="modal-adminLogin" role="dialog" aria-modal="true">
     <div class="modal modal--admin">
-      <div class="admin-modal-icon" aria-hidden="true">🔑</div>
-      <h3 class="admin-modal-title" id="adminLoginTitle">เข้าสู่ระบบผู้ดูแล</h3>
+      <div class="admin-modal-icon">🔑</div>
+      <h3 class="admin-modal-title">เข้าสู่ระบบผู้ดูแล</h3>
       <p class="admin-modal-sub">เฉพาะผู้ดูแลระบบที่ได้รับอนุญาตเท่านั้น</p>
       <div class="form-group">
-        <label for="adminPwInput">รหัสผ่านผู้ดูแลระบบ</label>
+        <label>รหัสผ่านผู้ดูแลระบบ</label>
         <div class="pw-input-wrap">
-          <input type="password" id="adminPwInput"
-                 placeholder="กรอกรหัสผ่าน"
-                 autocomplete="off"
-                 onkeydown="if(event.key==='Enter') verifyAdmin()">
-          <button class="pw-toggle" type="button"
-                  onclick="togglePwVisibility()"
-                  aria-label="แสดง/ซ่อนรหัสผ่าน">👁</button>
+          <input type="password" id="adminPwInput" placeholder="กรอกรหัสผ่าน"
+                 autocomplete="off" onkeydown="if(event.key==='Enter') verifyAdmin()">
+          <button class="pw-toggle" type="button" onclick="togglePwVisibility()">👁</button>
         </div>
       </div>
       <div class="admin-error"    id="adminError"      role="alert"></div>
@@ -499,17 +549,29 @@
     </div>
   </div>
 
-  <!-- =====================================================
-       SCRIPTS — โหลดตามลำดับ dependency
-       ===================================================== -->
+  <!-- ==================== SCRIPTS ==================== -->
   <script src="js/utils.js"></script>
   <script src="js/theme.js"></script>
+  <script src="js/datepicker.js"></script>
+  <script src="js/notify.js"></script>
   <script src="js/app.js"></script>
   <script src="js/admin.js"></script>
   <script src="js/budget.js"></script>
   <script src="js/activity.js"></script>
   <script src="js/voice.js"></script>
+  <script src="js/announcement.js"></script>
   <script src="js/dashboard.js"></script>
+  <script>
+    /* ── Filter Announcements ── */
+    function filterAnnounce(btn, type) {
+      document.querySelectorAll('.announce-filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.announce-card').forEach(card => {
+        card.style.display = (type === 'all' || card.querySelector('.announce-badge').dataset.type === type)
+          ? '' : 'none';
+      });
+    }
+  </script>
 
 </body>
 </html>

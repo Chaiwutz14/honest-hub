@@ -434,13 +434,18 @@ function buildSwitcher() {
     toggleBtn.classList.remove('active');
   }
 
-  // แทรกก่อน hamburger button ใน nav
-  const nav = document.querySelector('nav');
+  // แทรกเข้า .nav-right ก่อน hamburger (ชิดปุ่ม hamburger ทั้ง desktop และ mobile)
+  const navRight  = document.querySelector('.nav-right');
   const hamburger = document.getElementById('hamburgerBtn');
-  if (nav && hamburger) {
-    nav.insertBefore(wrapper, hamburger);
-  } else if (nav) {
-    nav.appendChild(wrapper);
+  if (navRight && hamburger) {
+    navRight.insertBefore(wrapper, hamburger);
+  } else {
+    const nav = document.querySelector('nav');
+    if (nav && hamburger) {
+      nav.insertBefore(wrapper, hamburger);
+    } else if (nav) {
+      nav.appendChild(wrapper);
+    }
   }
 }
 

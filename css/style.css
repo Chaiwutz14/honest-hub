@@ -577,3 +577,186 @@ nav,
   .theme-dropdown { right: -8px; width: 220px; }
   .theme-toggle-btn { width: 32px; height: 32px; font-size: 0.92rem; }
 }
+
+/* ============================================================
+   v5.0 ADDITIONS
+   ============================================================ */
+
+/* === URGENT BANNER (หน้า Home) === */
+#urgentBanner {
+  display: none;
+  position: fixed;
+  top: var(--nav-h); left: 0; right: 0;
+  z-index: 480;
+  background: linear-gradient(90deg, #b94040, #9b2020);
+  color: #fff;
+  padding: 9px 20px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  align-items: center;
+  gap: 12px;
+  overflow: hidden;
+}
+.urgent-label { flex-shrink:0; font-weight:700; letter-spacing:1px; }
+.urgent-text  { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+/* === ANNOUNCEMENT CARDS === */
+.announce-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.announce-card {
+  background: var(--white);
+  border-radius: var(--radius-md);
+  padding: 20px 22px;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--ease), transform var(--ease);
+  position: relative;
+}
+.announce-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+.announce-card--pinned { box-shadow: 0 4px 16px rgba(201,168,76,0.2); }
+
+.announce-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.announce-badge {
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: 12px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.announce-actions { display: flex; gap: 6px; }
+
+.announce-pin-btn,
+.announce-del-btn {
+  background: none; border: none;
+  cursor: pointer; font-size: 1rem;
+  padding: 4px 6px; border-radius: var(--radius-sm);
+  transition: background var(--ease);
+  line-height: 1;
+}
+.announce-pin-btn:hover { background: rgba(201,168,76,0.12); }
+.announce-del-btn:hover { background: var(--red-light); }
+
+.announce-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.announce-meta {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-size: 0.76rem;
+  color: var(--gray);
+  margin-bottom: 10px;
+  align-items: center;
+}
+
+.announce-expire { color: #b94040; }
+.announce-pin-tag {
+  background: rgba(201,168,76,0.12);
+  color: #8a6a10;
+  padding: 2px 8px;
+  border-radius: 8px;
+  font-size: 0.71rem;
+  font-weight: 600;
+}
+
+.announce-body {
+  font-size: 0.87rem;
+  color: #3a4455;
+  line-height: 1.75;
+  white-space: pre-wrap;
+}
+
+/* === DATE PICKER PREVIEW === */
+.datepicker-preview {
+  font-size: 0.78rem;
+  color: var(--gold);
+  margin-top: 4px;
+  min-height: 18px;
+  font-weight: 600;
+}
+
+/* === DASHBOARD — announce count card === */
+.dash-card--announce { border-left-color: #b94040; }
+
+/* === THEME TOGGLE — mobile position fix === */
+/* ย้าย theme switcher ให้ชิดซ้ายของ hamburger */
+@media (max-width: 768px) {
+  .theme-switcher { order: 1; margin-right: 4px; }
+  .hamburger      { order: 2; }
+  /* Nav right section ต้องเป็น flex */
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+}
+
+/* === ANNOUNCEMENT HUB — filter bar === */
+.announce-filter {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+.announce-filter-btn {
+  padding: 6px 16px;
+  border-radius: 20px;
+  border: 1.5px solid #e2ddd5;
+  background: var(--white);
+  font-family: 'Sarabun', sans-serif;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all var(--ease);
+  color: var(--gray);
+}
+.announce-filter-btn:hover,
+.announce-filter-btn.active {
+  border-color: var(--gold);
+  background: rgba(201,168,76,0.08);
+  color: var(--navy);
+}
+
+/* === Responsive === */
+@media (max-width: 480px) {
+  .announce-title { font-size: 1rem; }
+  .announce-meta  { gap: 8px; }
+  #urgentBanner   { font-size: 0.76rem; padding: 8px 14px; }
+}
+
+/* === NAV-RIGHT wrapper (theme + hamburger) === */
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* Desktop: ซ่อน hamburger แสดง theme toggle */
+@media (min-width: 769px) {
+  .nav-right .hamburger { display: none; }
+  .nav-right .theme-switcher { display: flex; }
+}
+
+/* Mobile: แสดงทั้งคู่ชิดกัน */
+@media (max-width: 768px) {
+  .nav-right { gap: 4px; }
+  .nav-right .theme-switcher { display: flex; margin-right: 0; }
+  .nav-right .hamburger      { display: flex; }
+  /* ไม่ซ่อน nav-links ผ่าน .nav-right */
+}
