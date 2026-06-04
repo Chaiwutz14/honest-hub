@@ -299,7 +299,7 @@ function toggleCommentEmpty() {
    ⚠️  LINE_CHANNEL_TOKEN และ LINE_TARGET_ID เก็บใน Worker เท่านั้น
        ดูโค้ด Worker ได้ที่ /worker/line-notify-worker.js
    ============================================================ */
-const WORKER_URL = 'https://honest-hub-notify.peeza1482546.workers.dev/';
+const WORKER_URL = 'https://honest-hub-notify.peeza1482546.workers.dev';
 // ^ เปลี่ยนเป็น URL จริงหลัง deploy Cloudflare Worker
 
 async function sendNotification(commentData) {
