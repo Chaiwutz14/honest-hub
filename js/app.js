@@ -1,5 +1,7 @@
 /* ============================================================
-   app.js — Navigation & Init v5.0
+   app.js — Navigation & Init v5.1
+   ============================================================
+   🔧 FIX: รอ firebase:ready event ก่อน render ทุกอย่าง
    ============================================================ */
 
 'use strict';
@@ -19,7 +21,7 @@ function showPage(id) {
   const mNavEl = document.getElementById('mnav-' + id);
   if (mNavEl) mNavEl.classList.add('nav-active');
 
-  window.scrollTo({ top:0, behavior:'smooth' });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 
   if (id === 'dashboard')    updateDashboard();
   if (id === 'voice')        updateCommentCount();
@@ -27,19 +29,16 @@ function showPage(id) {
 }
 
 function toggleMobileMenu() {
-  const btn  = document.getElementById('hamburgerBtn');
-  const menu = document.getElementById('mobileMenu');
+  const btn    = document.getElementById('hamburgerBtn');
+  const menu   = document.getElementById('mobileMenu');
   const isOpen = menu.classList.toggle('open');
   btn.classList.toggle('open', isOpen);
   btn.setAttribute('aria-expanded', isOpen);
 }
-
 function closeMobileMenu() {
-  const btn  = document.getElementById('hamburgerBtn');
-  const menu = document.getElementById('mobileMenu');
-  menu.classList.remove('open');
-  btn.classList.remove('open');
-  btn.setAttribute('aria-expanded', 'false');
+  document.getElementById('hamburgerBtn').classList.remove('open');
+  document.getElementById('mobileMenu').classList.remove('open');
+  document.getElementById('hamburgerBtn').setAttribute('aria-expanded', 'false');
 }
 
 document.addEventListener('click', e => {
@@ -62,12 +61,22 @@ async function trackVisitor() {
   await DB.set('visitors', count + 1);
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
-  // nav active
+
+/* ============================================================
+   INIT — รอ firebase:ready ก่อน render ทุกอย่าง
+   ============================================================ */
+document.addEventListener('DOMContentLoaded', () => {
+  // set home nav active ก่อนเลย (ไม่ต้องรอ Firebase)
   const navHome  = document.getElementById('nav-home');
   const mNavHome = document.getElementById('mnav-home');
   if (navHome)  navHome.classList.add('nav-active');
   if (mNavHome) mNavHome.classList.add('nav-active');
+});
+
+// รอ Firebase init เสร็จก่อน render
+// firebase:ready ถูก dispatch จาก utils.js หลัง initFirebase() เสร็จ
+document.addEventListener('firebase:ready', async () => {
+  console.log('🚀 App init — Firebase ready:', isOnline);
 
   // load admin state
   if (typeof loadAdminState === 'function') await loadAdminState();
@@ -75,7 +84,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // track visitor
   await trackVisitor();
 
-  // render all data
+  // render ทุกส่วน — ตอนนี้ Firebase พร้อมแล้วแน่นอน
   await renderBudgetRows();
   await renderActivityCards();
   await renderAllComments();

@@ -21,10 +21,15 @@ async function renderBudgetRows() {
   const tbody = document.getElementById('budgetBody');
   tbody.innerHTML = '';
 
-  const hasSeeded = await DB.get('budgetSeeded');
-  if (!hasSeeded) {
-    await DB.set('budgetData',   SEED_BUDGET_DATA);
-    await DB.set('budgetSeeded', true);
+  // seed init ครั้งเดียว
+  if (!_budgetInitDone) {
+    const hasSeeded = await DB.get('budgetSeeded');
+    if (!hasSeeded) {
+      await DB.set('budgetData',   SEED_BUDGET_DATA);
+      await DB.set('budgetSeeded', true);
+      console.log('✅ Budget seed data initialized');
+    }
+    _budgetInitDone = true;
   }
 
   const data = (await DB.get('budgetData')) || [];
