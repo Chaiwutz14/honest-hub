@@ -17,6 +17,9 @@ const BADGE_MAP = {
   pending:  '<span class="badge badge-pending">○ ยังไม่เริ่ม</span>',
 };
 
+// seed init flag — ทำครั้งเดียวต่อ session
+let _budgetInitDone = false;
+
 async function renderBudgetRows() {
   const tbody = document.getElementById('budgetBody');
   tbody.innerHTML = '';

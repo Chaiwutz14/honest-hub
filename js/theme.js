@@ -327,7 +327,8 @@ function applyTheme(themeId) {
   });
 
   // บันทึกลง localStorage
-  DB.set('selectedTheme', themeId);
+  // ใช้ localStorage โดยตรง — ธีมเป็น preference เฉพาะเครื่อง ไม่ต้องซิงค์
+  try { localStorage.setItem('hh_selectedTheme', themeId); } catch(e) {}
 }
 
 
@@ -457,7 +458,8 @@ function initTheme() {
   buildSwitcher();
 
   // โหลดธีมที่เคยเลือก หรือใช้ navy เป็น default
-  const saved = DB.get('selectedTheme') || 'navy';
+  // อ่านจาก localStorage โดยตรง
+  const saved = (() => { try { return localStorage.getItem('hh_selectedTheme'); } catch(e) { return null; } })() || 'navy';
   applyTheme(saved);
 }
 
