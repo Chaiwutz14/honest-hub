@@ -119,7 +119,8 @@ function buildAnnounceCard(item) {
   pinBtn.textContent = item.pinned ? '📌' : '📍';
   pinBtn.onclick     = async () => {
     await DB.announcements.togglePin(item);
-    if (!isOnline) await renderAnnouncements();
+    const latest = await DB.announcements.getAll();
+    _renderAnnouncementList(latest);
   };
 
   const delBtn = document.createElement('button');
@@ -207,7 +208,10 @@ async function addAnnouncement() {
 
   await DB.announcements.add(newItem);
   await addLog('เพิ่มประกาศ: ' + title);
-  if (!isOnline) await renderAnnouncements();
+  // FIX: render ทุกกรณี — online ใช้ getAll ทันที, offline ใช้ localStorage
+  // ไม่พึ่ง listener อย่างเดียวเพราะอาจยังไม่ได้ subscribe
+  const latest = await DB.announcements.getAll();
+  _renderAnnouncementList(latest);
   closeAnnounceModal();
   await notifyAnnounce(newItem);
 }
@@ -219,7 +223,8 @@ function removeAnnouncement(item) {
     'ต้องการลบประกาศนี้?',
     async () => {
       await DB.announcements.delete(item);
-      if (!isOnline) await renderAnnouncements();
+      const latest = await DB.announcements.getAll();
+      _renderAnnouncementList(latest);
       showToast('🗑️ ลบประกาศเรียบร้อยแล้ว');
     },
     '🗑️', 'ลบประกาศ'
