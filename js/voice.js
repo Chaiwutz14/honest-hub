@@ -1,9 +1,12 @@
 /* ============================================================
-   voice.js — Voice Hub v5.1
-   🔧 FIX:
-   - listenForNew เป็น primary source (real-time)
-   - getAll() เป็น fallback เมื่อ offline
-   - delete ใช้ firestoreId เสมอ (ไม่ fallback ผิด)
+   voice.js — v6.1 FINAL
+   ============================================================
+   FIX:
+   - listenForNew เป็น primary source
+   - delete ใช้ firestoreId เสมอ
+   - ล้าง listener เมื่อออกจากหน้า
+   - Loading state ระหว่าง submit
+   - Toast แจ้งเตือน 1 อัน (ไม่ซ้อน)
    ============================================================ */
 
 'use strict';
@@ -15,7 +18,6 @@ const BAD_WORDS = [
   'แม่ง','เชี่ย','สาด','บักหำ','หำ','ดอกทอง',
   'fuck','shit','ass','bitch','bastard','damn',
 ];
-
 function containsBadWord(text) {
   const lower = text.toLowerCase();
   return BAD_WORDS.some(w => lower.includes(w.toLowerCase()));
@@ -32,7 +34,7 @@ function startCooldown() {
   const submitBtn = document.getElementById('submitCommentBtn');
   if (!bar) return;
   bar.style.display = 'flex';
-  if (submitBtn) submitBtn.disabled = true;
+  if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = '📨 ส่งความคิดเห็น'; }
   let remaining = COMMENT_COOLDOWN_SEC;
   if (timerEl) timerEl.textContent = remaining;
   cooldownInterval = setInterval(() => {
@@ -41,7 +43,7 @@ function startCooldown() {
     if (remaining <= 0) {
       clearInterval(cooldownInterval);
       bar.style.display = 'none';
-      if (submitBtn) submitBtn.disabled = false;
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = '📨 ส่งความคิดเห็น'; }
     }
   }, 1000);
 }
@@ -55,33 +57,30 @@ const SEED_COMMENTS = [
     cat:'ความโปร่งใส' },
 ];
 
-const THAI_MONTHS = [
-  'ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.',
-  'ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.',
-];
+const THAI_MONTHS = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
 
+// FIX: ล้าง listener ได้เมื่อออกจากหน้า
 let _unsubscribeComments = () => {};
 
+function cleanupVoiceListeners() {
+  _unsubscribeComments();
+  _unsubscribeComments = () => {};
+}
 
-/* ── renderAllComments ── */
 async function renderAllComments() {
-  const list = document.getElementById('commentList');
+  // ล้าง listener เก่าก่อน
+  cleanupVoiceListeners();
 
-  if (isOnline && _db !== null) {
-    // Firebase online: ใช้ real-time listener เป็น primary
-    // unsubscribe อันเก่าก่อน
-    _unsubscribeComments();
-
+  if (isOnline && _db) {
+    // Online: ใช้ real-time listener
     _unsubscribeComments = DB.comments.listenForNew(freshComments => {
       _renderCommentList(freshComments);
     });
-
-    // โหลดครั้งแรกด้วย getAll (listener อาจใช้เวลา connect)
+    // โหลดครั้งแรก
     const initial = await DB.comments.getAll();
     _renderCommentList(initial);
-
   } else {
-    // Offline: ใช้ localStorage
+    // Offline: localStorage
     const stored = await DB.comments.getAll();
     _renderCommentList(stored);
   }
@@ -90,19 +89,11 @@ async function renderAllComments() {
 function _renderCommentList(storedComments) {
   const list = document.getElementById('commentList');
   list.innerHTML = '';
-
-  // แสดง stored comments (จาก Firestore หรือ localStorage)
   storedComments.forEach(c => list.appendChild(buildCommentCard(c, true)));
-
-  // แสดง seed comments ท้ายรายการ
   SEED_COMMENTS.forEach(c => list.appendChild(buildCommentCard(c, false)));
-
   updateCommentCount(storedComments.length);
-  toggleCommentEmpty();
 }
 
-
-/* ── buildCommentCard (XSS safe) ── */
 function buildCommentCard(item, deletable = false) {
   const card = document.createElement('div');
   card.className = 'comment-card';
@@ -123,21 +114,14 @@ function buildCommentCard(item, deletable = false) {
     delBtn.className   = 'comment-del admin-only';
     delBtn.textContent = '🗑';
     delBtn.title       = 'ลบความคิดเห็น';
-    // capture item ทั้ง object ณ ตอนสร้าง (มี firestoreId แน่นอน)
     const capturedItem = { ...item };
     delBtn.onclick = () => {
       showConfirm(
         'ต้องการลบความคิดเห็นนี้?',
         async () => {
-          const ok = await DB.comments.delete(capturedItem);
-          if (ok) {
-            // ถ้า online Firestore จะ trigger listener อัปเดตเอง
-            // ถ้า offline ต้อง render ใหม่เอง
-            if (!isOnline) {
-              await renderAllComments();
-            }
-            showToast('🗑️ ลบความคิดเห็นเรียบร้อยแล้ว');
-          }
+          await DB.comments.delete(capturedItem);
+          if (!isOnline) await renderAllComments();
+          showToast('🗑️ ลบความคิดเห็นเรียบร้อยแล้ว');
         },
         '🗑️', 'ลบความคิดเห็น'
       );
@@ -164,8 +148,6 @@ function buildCommentCard(item, deletable = false) {
   return card;
 }
 
-
-/* ── submitComment ── */
 async function submitComment() {
   const nameInput = document.getElementById('commentName');
   const catSel    = document.getElementById('commentCat');
@@ -212,17 +194,15 @@ async function submitComment() {
   const date = `${d.getDate()} ${THAI_MONTHS[d.getMonth()]} ${d.getFullYear() + 543}`;
   const commentData = { id: 'c-' + Date.now(), name, cat, text: rawText, date };
 
+  // FIX: Loading state ที่ชัดเจน
   isSubmitting = true;
-  if (submitBtn) submitBtn.disabled = true;
+  if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = '⏳ กำลังส่ง...'; }
 
   try {
     await DB.comments.add(commentData);
     await addLog('ความคิดเห็นใหม่จาก: ' + name);
-
-    // offline: render ใหม่เอง (online: listener จัดการ)
     if (!isOnline) await renderAllComments();
 
-    // reset form
     nameInput.value = '';
     textInput.value = '';
     document.getElementById('commentCharCount').textContent = '0 / 500 ตัวอักษร';
@@ -230,19 +210,18 @@ async function submitComment() {
     lastCommentTime = Date.now();
     startCooldown();
 
+    // FIX: Toast เดียว — ไม่ซ้อน
     await notifyComment(commentData);
 
   } catch (err) {
     showToast('❌ เกิดข้อผิดพลาด กรุณาลองใหม่', 'error');
     console.error('submitComment error:', err);
-    if (submitBtn) submitBtn.disabled = false;
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = '📨 ส่งความคิดเห็น'; }
   } finally {
     isSubmitting = false;
   }
 }
 
-
-/* ── updateCommentCount ── */
 async function updateCommentCount(storedCount) {
   const label = document.getElementById('commentCountLabel');
   if (!label) return;
@@ -254,18 +233,6 @@ async function updateCommentCount(storedCount) {
   label.textContent = `มีความคิดเห็นทั้งหมด ${count + SEED_COMMENTS.length} รายการ`;
 }
 
-function toggleCommentEmpty() {
-  const list    = document.getElementById('commentList');
-  const emptyEl = document.getElementById('commentEmpty');
-  if (!emptyEl) return;
-  // นับเฉพาะ stored comments (ไม่นับ seed)
-  const storedCount = list.querySelectorAll('.comment-card').length - SEED_COMMENTS.length;
-  emptyEl.style.display = storedCount <= 0 && list.children.length <= SEED_COMMENTS.length
-    ? 'none' : 'none'; // seed เสมอแสดง ไม่ต้อง empty state
-}
-
-
-/* ── char counter ── */
 document.addEventListener('DOMContentLoaded', () => {
   const textInput = document.getElementById('commentText');
   const charCount = document.getElementById('commentCharCount');

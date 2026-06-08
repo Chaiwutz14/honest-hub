@@ -1,11 +1,15 @@
 /* ============================================================
-   dashboard.js — Dashboard v5.0
+   dashboard.js — v6.1 FINAL
+   ============================================================
+   FIX:
+   - ลบ hardcode fallback || 3 และ || 4
+   - log timestamp แสดงจริง ไม่ใช่ "เมื่อกี้" ตลอด
    ============================================================ */
 
 'use strict';
 
 async function updateDashboard() {
-  const visitors = parseInt((await DB.get('visitors')) || '1');
+  const visitors  = parseInt((await DB.get('visitors')) || '0');
   const visitorEl = document.getElementById('visitorCount');
   if (visitorEl) visitorEl.textContent = visitors.toLocaleString('th-TH');
 
@@ -20,14 +24,15 @@ async function updateDashboard() {
 
   const activityData = (await DB.get('activityData')) || [];
   const activityEl   = document.getElementById('activityCount');
-  if (activityEl) activityEl.textContent = activityData.length || 3;
+  // FIX: ลบ hardcode fallback
+  if (activityEl) activityEl.textContent = activityData.length;
 
   const budgetData = (await DB.get('budgetData')) || [];
   const budgetEl   = document.getElementById('budgetCount');
-  if (budgetEl) budgetEl.textContent = budgetData.length || 4;
+  if (budgetEl) budgetEl.textContent = budgetData.length;
 
-  const announcements  = await DB.announcements.getAll();
-  const announceEl     = document.getElementById('announceCount');
+  const announcements = await DB.announcements.getAll();
+  const announceEl    = document.getElementById('announceCount');
   if (announceEl) announceEl.textContent = announcements.length;
 
   await renderActivityLog();
@@ -38,14 +43,25 @@ async function renderActivityLog() {
   if (!container) return;
   container.innerHTML = '';
 
+  const stored  = (await DB.get('logs')) || [];
+
+  // FIX: ถ้าไม่มี log จริงเลย ใช้ default แต่แสดงเวลาจริง
+  const now = new Date().toLocaleTimeString('th-TH', { hour:'2-digit', minute:'2-digit' });
   const defaults = [
-    { text:'ผู้ใช้ใหม่เข้าชมเว็บไซต์',   time:'เมื่อกี้' },
-    { text:'มีการเพิ่มกิจกรรมใหม่',       time:'1 ชั่วโมงก่อน' },
-    { text:'ผู้ปกครองแสดงความคิดเห็น',    time:'3 ชั่วโมงก่อน' },
+    { text:'ระบบเริ่มต้นทำงาน',              time: now },
+    { text:'ผู้ใช้เข้าชมเว็บไซต์',            time: now },
+    { text:'โหลดข้อมูลจาก Firebase สำเร็จ',   time: now },
   ];
 
-  const stored  = (await DB.get('logs')) || [];
-  const allLogs = [...stored, ...defaults].slice(0, 8);
+  const allLogs = stored.length > 0 ? stored.slice(0, 8) : defaults;
+
+  if (allLogs.length === 0) {
+    const empty = document.createElement('p');
+    empty.style.cssText = 'color:#6b7280;font-size:0.85rem;padding:12px 0;';
+    empty.textContent   = 'ยังไม่มีกิจกรรม';
+    container.appendChild(empty);
+    return;
+  }
 
   allLogs.forEach(log => {
     const row  = document.createElement('div');

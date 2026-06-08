@@ -1,112 +1,127 @@
 /* ============================================================
-   announcement.js — Announcement Hub v5.0 (HUB 06)
+   announcement.js — v6.1 FINAL
    ============================================================
-   A. ANNOUNCE_TYPES    — ประเภทประกาศ + badge config
-   B. renderAnnouncements — โหลด + render ทั้งหมด
-   C. buildAnnounceCard — สร้าง DOM card
-   D. addAnnouncement   — validate + persist + notify
-   E. removeAnnouncement — ลบ
-   F. togglePin         — ปักหมุด/ยกเลิกปักหมุด
-   G. checkExpired      — ซ่อนประกาศที่หมดอายุ
-   H. renderUrgentBanner — แสดง Banner บนหน้าหลัก
+   FIX:
+   - ย้าย filterAnnounce เข้ามาใน module นี้
+   - แก้ infinite loop จาก listenForNew → renderAnnouncements
+   - ล้าง listener เมื่อออกจากหน้า
+   - badge มี data-type สำหรับ filter
    ============================================================ */
 
 'use strict';
 
 const ANNOUNCE_TYPES = {
-  urgent:      { label:'🔴 ด่วนมาก',    color:'#b94040', bg:'#fff0f0', border:'#f5c6c6' },
-  announce:    { label:'📌 ประกาศ',      color:'#1a4a8a', bg:'#eef2ff', border:'#c3cfe2' },
-  activity:    { label:'📅 กิจกรรม',     color:'#2d7a4f', bg:'#f0faf4', border:'#a8d5b8' },
-  mourning:    { label:'🎗️ ไว้อาลัย',   color:'#333333', bg:'#f5f5f5', border:'#cccccc' },
-  general:     { label:'ℹ️ ทั่วไป',      color:'#6b7280', bg:'#f9fafb', border:'#e5e7eb' },
+  urgent:   { label:'🔴 ด่วนมาก',   color:'#b94040', bg:'#fff0f0', border:'#f5c6c6' },
+  announce: { label:'📌 ประกาศ',     color:'#1a4a8a', bg:'#eef2ff', border:'#c3cfe2' },
+  activity: { label:'📅 กิจกรรม',    color:'#2d7a4f', bg:'#f0faf4', border:'#a8d5b8' },
+  mourning: { label:'🎗️ ไว้อาลัย',  color:'#333333', bg:'#f5f5f5', border:'#cccccc' },
+  general:  { label:'ℹ️ ทั่วไป',     color:'#6b7280', bg:'#f9fafb', border:'#e5e7eb' },
 };
 
-let unsubscribeAnnouncements = () => {};
+// FIX: แยก listener และ render — ป้องกัน infinite loop
+let _unsubscribeAnnouncements = () => {};
+let _currentFilter = 'all';
 
+function cleanupAnnouncementListeners() {
+  _unsubscribeAnnouncements();
+  _unsubscribeAnnouncements = () => {};
+}
 
-/* ── A. renderAnnouncements ── */
+/* ── Render ── */
 async function renderAnnouncements() {
+  // ล้าง listener เก่า
+  cleanupAnnouncementListeners();
+
   const grid = document.getElementById('announcementGrid');
   if (!grid) return;
+
+  if (isOnline && _db) {
+    // Online: real-time listener
+    // FIX: listener เรียก _renderAnnouncementList โดยตรง ไม่เรียก renderAnnouncements
+    _unsubscribeAnnouncements = DB.announcements.listenForNew(freshData => {
+      _renderAnnouncementList(freshData);
+    });
+    // โหลดครั้งแรก
+    const initial = await DB.announcements.getAll();
+    _renderAnnouncementList(initial);
+  } else {
+    const data = await DB.announcements.getAll();
+    _renderAnnouncementList(data);
+  }
+}
+
+function _renderAnnouncementList(rawData) {
+  const grid    = document.getElementById('announcementGrid');
+  const emptyEl = document.getElementById('announceEmpty');
+  if (!grid) return;
+
   grid.innerHTML = '';
 
-  let data = await DB.announcements.getAll();
-
-  // กรองที่หมดอายุแล้วออก (ถ้าไม่ปักหมุด)
   const now = new Date();
-  data = data.filter(item => {
-    if (item.pinned) return true; // ปักหมุดแสดงเสมอ
-    if (!item.expireDate) return true; // ไม่มีวันหมดอายุแสดงเสมอ
+
+  // กรองหมดอายุ (ยกเว้นปักหมุด)
+  let data = rawData.filter(item => {
+    if (item.pinned) return true;
+    if (!item.expireDate) return true;
     return new Date(item.expireDate) >= now;
   });
 
-  // เรียงลำดับ: ปักหมุดก่อน → ด่วนก่อน → ล่าสุดก่อน
+  // เรียงลำดับ: ปักหมุด → ด่วน → ล่าสุด
   data.sort((a, b) => {
     if (a.pinned && !b.pinned) return -1;
-    if (!a.pinned && b.pinned) return 1;
+    if (!a.pinned && b.pinned)  return 1;
     if (a.type === 'urgent' && b.type !== 'urgent') return -1;
-    if (a.type !== 'urgent' && b.type === 'urgent') return 1;
+    if (a.type !== 'urgent' && b.type === 'urgent')  return 1;
     return 0;
   });
 
-  if (data.length === 0) {
-    const emptyEl = document.getElementById('announceEmpty');
+  // apply filter
+  const filtered = _currentFilter === 'all' ? data : data.filter(i => i.type === _currentFilter);
+
+  if (filtered.length === 0) {
     if (emptyEl) emptyEl.style.display = 'block';
-    return;
+  } else {
+    if (emptyEl) emptyEl.style.display = 'none';
+    filtered.forEach(item => grid.appendChild(buildAnnounceCard(item)));
   }
 
-  const emptyEl = document.getElementById('announceEmpty');
-  if (emptyEl) emptyEl.style.display = 'none';
-
-  data.forEach(item => grid.appendChild(buildAnnounceCard(item)));
-
-  // render urgent banner บนหน้าหลัก
+  // urgent banner
   renderUrgentBanner(data.filter(i => i.type === 'urgent'));
-
-  // Real-time listener
-  unsubscribeAnnouncements();
-  unsubscribeAnnouncements = DB.announcements.listenForNew(fresh => {
-    renderAnnouncements();
-  });
 }
 
-
-/* ── B. buildAnnounceCard ── */
+/* ── Build card ── */
 function buildAnnounceCard(item) {
   const cfg  = ANNOUNCE_TYPES[item.type] || ANNOUNCE_TYPES.general;
-
   const card = document.createElement('div');
   card.className        = 'announce-card' + (item.pinned ? ' announce-card--pinned' : '');
-  card.dataset.id       = item.id;
+  card.dataset.id       = item.id || '';
   card.style.borderLeft = `4px solid ${cfg.border}`;
   card.style.background = cfg.bg;
 
-  // Top row: badge + pin + delete
-  const topRow = document.createElement('div');
+  // top row
+  const topRow  = document.createElement('div');
   topRow.className = 'announce-top';
 
   const badge = document.createElement('span');
-  badge.className       = 'announce-badge';
-  badge.style.color     = cfg.color;
+  badge.className      = 'announce-badge';
+  badge.style.color    = cfg.color;
   badge.style.background = cfg.bg;
-  badge.style.border    = `1px solid ${cfg.border}`;
-  badge.textContent     = cfg.label;
-  badge.dataset.type    = item.type;
+  badge.style.border   = `1px solid ${cfg.border}`;
+  badge.textContent    = cfg.label;
+  badge.dataset.type   = item.type; // FIX: สำหรับ filter
 
   const rightBtns = document.createElement('div');
   rightBtns.className = 'announce-actions';
 
-  // ปักหมุด (admin only)
   const pinBtn = document.createElement('button');
   pinBtn.className   = 'announce-pin-btn admin-only';
   pinBtn.title       = item.pinned ? 'ยกเลิกปักหมุด' : 'ปักหมุด';
   pinBtn.textContent = item.pinned ? '📌' : '📍';
   pinBtn.onclick     = async () => {
     await DB.announcements.togglePin(item);
-    await renderAnnouncements();
+    if (!isOnline) await renderAnnouncements();
   };
 
-  // ลบ (admin only)
   const delBtn = document.createElement('button');
   delBtn.className   = 'announce-del-btn admin-only';
   delBtn.textContent = '🗑';
@@ -118,19 +133,18 @@ function buildAnnounceCard(item) {
   topRow.appendChild(badge);
   topRow.appendChild(rightBtns);
 
-  // หัวข้อ
+  // title
   const titleEl = document.createElement('div');
   titleEl.className   = 'announce-title';
   titleEl.style.color = cfg.color;
   titleEl.textContent = item.title;
 
-  // วันที่ + หมดอายุ
+  // meta
   const metaEl = document.createElement('div');
   metaEl.className = 'announce-meta';
 
   const dateEl = document.createElement('span');
   dateEl.textContent = '📅 ' + (item.dateDisplay || '—');
-
   metaEl.appendChild(dateEl);
 
   if (item.expireDate) {
@@ -147,7 +161,7 @@ function buildAnnounceCard(item) {
     metaEl.appendChild(pinTag);
   }
 
-  // เนื้อหา
+  // body
   const bodyEl = document.createElement('div');
   bodyEl.className   = 'announce-body';
   bodyEl.textContent = item.body || '';
@@ -156,8 +170,7 @@ function buildAnnounceCard(item) {
   return card;
 }
 
-
-/* ── C. addAnnouncement ── */
+/* ── Add ── */
 async function addAnnouncement() {
   const titleInput  = document.getElementById('anTitle');
   const bodyInput   = document.getElementById('anBody');
@@ -168,11 +181,11 @@ async function addAnnouncement() {
 
   titleErr.classList.remove('show');
 
-  const title      = titleInput.value.trim();
-  const body       = bodyInput.value.trim();
-  const type       = typeSelect.value;
-  const dateVal    = dateInput ? dateInput.value : '';
-  const expireVal  = expireInput ? expireInput.value : '';
+  const title     = titleInput.value.trim();
+  const body      = bodyInput.value.trim();
+  const type      = typeSelect.value;
+  const dateVal   = dateInput   ? dateInput.value   : '';
+  const expireVal = expireInput ? expireInput.value  : '';
 
   if (!title) {
     titleErr.textContent = 'กรุณากรอกหัวข้อประกาศ';
@@ -181,65 +194,75 @@ async function addAnnouncement() {
     return;
   }
 
-  const dateDisplay = dateVal ? formatDateDisplay(dateVal) : formatDateDisplay(new Date().toISOString().split('T')[0]);
+  const today       = new Date().toISOString().split('T')[0];
+  const dateDisplay = dateVal ? formatDateDisplay(dateVal) : formatDateDisplay(today);
 
   const newItem = {
-    id:          'an-' + Date.now(),
+    id: 'an-' + Date.now(),
     title, body, type,
     dateDisplay,
-    expireDate:  expireVal || null,
-    pinned:      false,
+    expireDate: expireVal || null,
+    pinned:     false,
   };
 
   await DB.announcements.add(newItem);
   await addLog('เพิ่มประกาศ: ' + title);
-  await renderAnnouncements();
+  if (!isOnline) await renderAnnouncements();
   closeAnnounceModal();
   await notifyAnnounce(newItem);
 }
 
-
-/* ── D. removeAnnouncement ── */
+/* ── Remove ── */
 function removeAnnouncement(item) {
   if (!isAdmin) return;
-  showConfirm('ต้องการลบประกาศนี้?', async () => {
-    await DB.announcements.delete(item);
-    await renderAnnouncements();
-    showToast('🗑️ ลบประกาศเรียบร้อยแล้ว');
-  }, '🗑️', 'ลบประกาศ');
+  showConfirm(
+    'ต้องการลบประกาศนี้?',
+    async () => {
+      await DB.announcements.delete(item);
+      if (!isOnline) await renderAnnouncements();
+      showToast('🗑️ ลบประกาศเรียบร้อยแล้ว');
+    },
+    '🗑️', 'ลบประกาศ'
+  );
 }
 
-
-/* ── E. renderUrgentBanner ── */
+/* ── Urgent Banner ── */
 function renderUrgentBanner(urgentItems) {
   const banner = document.getElementById('urgentBanner');
   if (!banner) return;
-
-  if (urgentItems.length === 0) {
-    banner.style.display = 'none';
-    return;
-  }
-
+  if (urgentItems.length === 0) { banner.style.display = 'none'; return; }
   banner.style.display = 'flex';
   const text = banner.querySelector('.urgent-text');
-  if (text) {
-    text.textContent = urgentItems.map(i => '🔴 ' + i.title).join('  ·  ');
-  }
+  if (text) text.textContent = urgentItems.map(i => '🔴 ' + i.title).join('  ·  ');
 }
 
+/* ── Filter — FIX: ย้ายมาอยู่ใน module ── */
+function filterAnnounce(btn, type) {
+  document.querySelectorAll('.announce-filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  _currentFilter = type;
 
-/* ── F. closeAnnounceModal ── */
+  // re-render ด้วย filter ใหม่ โดยไม่ subscribe ใหม่
+  const cards = document.querySelectorAll('.announce-card');
+  if (cards.length === 0) return;
+
+  cards.forEach(card => {
+    if (type === 'all') {
+      card.style.display = '';
+    } else {
+      const badgeType = card.querySelector('.announce-badge')?.dataset.type;
+      card.style.display = (badgeType === type) ? '' : 'none';
+    }
+  });
+}
+
+/* ── Close modal ── */
 function closeAnnounceModal() {
-  ['anTitle','anBody'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = '';
-  });
-  ['anDate','anExpire'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = '';
-  });
+  ['anTitle','anBody'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  ['anDate','anExpire'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   const sel = document.getElementById('anType');
   if (sel) sel.selectedIndex = 0;
-  document.getElementById('anTitleError').classList.remove('show');
+  const err = document.getElementById('anTitleError');
+  if (err) err.classList.remove('show');
   closeModal('addAnnouncement');
 }

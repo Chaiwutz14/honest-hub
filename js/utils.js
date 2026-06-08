@@ -1,17 +1,15 @@
 /* ============================================================
-   utils.js — Firebase Firestore Edition v5.1
+   utils.js — v6.1 FINAL
    ============================================================
-   🔧 FIX v5.1:
-   - Firebase init เสร็จก่อน ค่อย fire event 'firebase:ready'
-   - app.js รอ event นี้ก่อน render ทุกอย่าง
-   - แก้ race condition ทั้งหมด
+   FIX:
+   - firebase:ready รอ DOMContentLoaded ก่อน dispatch
+   - DB layer ครบถ้วน + error handling
+   - addLog throttle ป้องกัน quota leak
    ============================================================ */
 
 'use strict';
 
-/* ============================================================
-   A. FIREBASE CONFIG
-   ============================================================ */
+/* ── Firebase Config ── */
 const FIREBASE_CONFIG = {
   apiKey:            'AIzaSyDBxjQyLCb4DWY36QhCGb3qM-L4S2Mh854',
   authDomain:        'honest-hub-ce8e4.firebaseapp.com',
@@ -21,57 +19,19 @@ const FIREBASE_CONFIG = {
   appId:             '1:102820431622:web:45b722ee3553e2a928c087',
 };
 
-
-/* ============================================================
-   C. GLOBAL STATE
-   ============================================================ */
+/* ── Global State ── */
 let isAdmin  = false;
 let isOnline = false;
-
-// Promise ที่ทุกโมดูลรอได้ — resolve เมื่อ Firebase init เสร็จ
-let _firebaseReadyResolve;
-const firebaseReady = new Promise(resolve => { _firebaseReadyResolve = resolve; });
-
-
-/* ============================================================
-   B. DB LAYER
-   ============================================================ */
 let _db        = null;
 let _firestore = null;
 
-async function initFirebase() {
-  try {
-    const { initializeApp } = await import(
-      'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js'
-    );
-    const {
-      getFirestore, doc, getDoc, setDoc, deleteDoc,
-      collection, addDoc, getDocs, query, orderBy,
-      onSnapshot, serverTimestamp,
-    } = await import(
-      'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js'
-    );
+/* ── Firebase Ready Promise ── */
+let _firebaseReadyResolve;
+const firebaseReady = new Promise(r => { _firebaseReadyResolve = r; });
 
-    const app  = initializeApp(FIREBASE_CONFIG);
-    _db        = getFirestore(app);
-    _firestore = {
-      doc, getDoc, setDoc, deleteDoc,
-      collection, addDoc, getDocs,
-      query, orderBy, onSnapshot, serverTimestamp,
-    };
-    isOnline = true;
-    console.log('✅ Firebase Firestore connected');
-
-  } catch (err) {
-    console.warn('⚠️ Firebase init failed — localStorage fallback:', err.message);
-    isOnline = false;
-  } finally {
-    // ไม่ว่า Firebase จะสำเร็จหรือไม่ — บอก app.js ว่าพร้อมแล้ว
-    _firebaseReadyResolve();
-    document.dispatchEvent(new CustomEvent('firebase:ready', { detail: { isOnline } }));
-  }
-}
-
+/* ── addLog throttle — ป้องกัน quota leak ── */
+let _lastLogText = '';
+let _lastLogTime = 0;
 
 /* ── localStorage helpers ── */
 function _lsGet(key) {
@@ -83,10 +43,29 @@ function _lsSet(key, value) {
   catch { return false; }
 }
 
+/* ── Firebase init ── */
+async function initFirebase() {
+  try {
+    const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
+    const {
+      getFirestore, doc, getDoc, setDoc, deleteDoc,
+      collection, addDoc, getDocs, query, orderBy,
+      onSnapshot, serverTimestamp,
+    } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
 
+    const app  = initializeApp(FIREBASE_CONFIG);
+    _db        = getFirestore(app);
+    _firestore = { doc, getDoc, setDoc, deleteDoc, collection, addDoc, getDocs, query, orderBy, onSnapshot, serverTimestamp };
+    isOnline   = true;
+    console.log('✅ Firebase connected');
+  } catch (err) {
+    console.warn('⚠️ Firebase failed → localStorage fallback:', err.message);
+    isOnline = false;
+  }
+}
+
+/* ── DB Object ── */
 const DB = {
-
-  /* รอ Firebase พร้อมก่อนทุก operation */
   async ready() { await firebaseReady; },
 
   async get(key) {
@@ -95,7 +74,7 @@ const DB = {
       try {
         const snap = await _firestore.getDoc(_firestore.doc(_db, 'hh_data', key));
         return snap.exists() ? snap.data().value : null;
-      } catch (err) { console.warn('DB.get error:', err.message); }
+      } catch (e) { console.warn('DB.get:', e.message); }
     }
     return _lsGet(key);
   },
@@ -109,7 +88,7 @@ const DB = {
           { value, updatedAt: _firestore.serverTimestamp() }
         );
         return true;
-      } catch (err) { console.warn('DB.set error:', err.message); }
+      } catch (e) { console.warn('DB.set:', e.message); }
     }
     return _lsSet(key, value);
   },
@@ -124,24 +103,19 @@ const DB = {
     await this.ready();
     if (isOnline && _db) {
       try { await _firestore.deleteDoc(_firestore.doc(_db, 'hh_data', key)); }
-      catch (err) { console.warn('DB.remove error:', err.message); }
+      catch (e) { console.warn('DB.remove:', e.message); }
     }
     try { localStorage.removeItem('hh_' + key); } catch { /* silent */ }
   },
 
-  /* ── COMMENTS ── */
   comments: {
-
     async add(data) {
       await firebaseReady;
       if (isOnline && _db) {
         try {
-          const ref = await _firestore.addDoc(
-            _firestore.collection(_db, 'hh_comments'),
-            { ...data, ts: _firestore.serverTimestamp() }
-          );
+          const ref = await _firestore.addDoc(_firestore.collection(_db, 'hh_comments'), { ...data, ts: _firestore.serverTimestamp() });
           return ref.id;
-        } catch (err) { console.warn('comments.add error:', err.message); }
+        } catch (e) { console.warn('comments.add:', e.message); }
       }
       const arr = _lsGet('comments') || [];
       arr.unshift(data);
@@ -153,29 +127,21 @@ const DB = {
       await firebaseReady;
       if (isOnline && _db) {
         try {
-          const q    = _firestore.query(
-            _firestore.collection(_db, 'hh_comments'),
-            _firestore.orderBy('ts', 'desc')
-          );
-          const snap = await _firestore.getDocs(q);
+          const snap = await _firestore.getDocs(_firestore.query(_firestore.collection(_db, 'hh_comments'), _firestore.orderBy('ts', 'desc')));
           return snap.docs.map(d => ({ ...d.data(), firestoreId: d.id }));
-        } catch (err) { console.warn('comments.getAll error:', err.message); }
+        } catch (e) { console.warn('comments.getAll:', e.message); }
       }
       return _lsGet('comments') || [];
     },
 
     async delete(item) {
       await firebaseReady;
-      // ลบจาก Firestore ถ้ามี firestoreId
       if (isOnline && _db && item.firestoreId) {
         try {
-          await _firestore.deleteDoc(
-            _firestore.doc(_db, 'hh_comments', item.firestoreId)
-          );
+          await _firestore.deleteDoc(_firestore.doc(_db, 'hh_comments', item.firestoreId));
           return true;
-        } catch (err) { console.warn('comments.delete Firestore error:', err.message); }
+        } catch (e) { console.warn('comments.delete:', e.message); }
       }
-      // localStorage fallback
       let arr = _lsGet('comments') || [];
       arr = arr.filter(c => c.id !== item.id);
       _lsSet('comments', arr);
@@ -185,34 +151,23 @@ const DB = {
     listenForNew(callback) {
       if (!isOnline || !_db) return () => {};
       try {
-        const q = _firestore.query(
-          _firestore.collection(_db, 'hh_comments'),
-          _firestore.orderBy('ts', 'desc')
-        );
+        const q = _firestore.query(_firestore.collection(_db, 'hh_comments'), _firestore.orderBy('ts', 'desc'));
         return _firestore.onSnapshot(q,
           snap => callback(snap.docs.map(d => ({ ...d.data(), firestoreId: d.id }))),
-          err  => console.warn('comments listener error:', err.message)
+          err  => console.warn('comments listener:', err.message)
         );
-      } catch (err) {
-        console.warn('listenForNew setup error:', err.message);
-        return () => {};
-      }
+      } catch (e) { console.warn('listenForNew:', e.message); return () => {}; }
     },
   },
 
-  /* ── ANNOUNCEMENTS ── */
   announcements: {
-
     async add(data) {
       await firebaseReady;
       if (isOnline && _db) {
         try {
-          const ref = await _firestore.addDoc(
-            _firestore.collection(_db, 'hh_announcements'),
-            { ...data, ts: _firestore.serverTimestamp() }
-          );
+          const ref = await _firestore.addDoc(_firestore.collection(_db, 'hh_announcements'), { ...data, ts: _firestore.serverTimestamp() });
           return ref.id;
-        } catch (err) { console.warn('announcements.add error:', err.message); }
+        } catch (e) { console.warn('announcements.add:', e.message); }
       }
       const arr = _lsGet('announcements') || [];
       arr.unshift(data);
@@ -224,13 +179,9 @@ const DB = {
       await firebaseReady;
       if (isOnline && _db) {
         try {
-          const q    = _firestore.query(
-            _firestore.collection(_db, 'hh_announcements'),
-            _firestore.orderBy('ts', 'desc')
-          );
-          const snap = await _firestore.getDocs(q);
+          const snap = await _firestore.getDocs(_firestore.query(_firestore.collection(_db, 'hh_announcements'), _firestore.orderBy('ts', 'desc')));
           return snap.docs.map(d => ({ ...d.data(), firestoreId: d.id }));
-        } catch (err) { console.warn('announcements.getAll error:', err.message); }
+        } catch (e) { console.warn('announcements.getAll:', e.message); }
       }
       return _lsGet('announcements') || [];
     },
@@ -239,11 +190,9 @@ const DB = {
       await firebaseReady;
       if (isOnline && _db && item.firestoreId) {
         try {
-          await _firestore.deleteDoc(
-            _firestore.doc(_db, 'hh_announcements', item.firestoreId)
-          );
+          await _firestore.deleteDoc(_firestore.doc(_db, 'hh_announcements', item.firestoreId));
           return true;
-        } catch (err) { console.warn('announcements.delete error:', err.message); }
+        } catch (e) { console.warn('announcements.delete:', e.message); }
       }
       let arr = _lsGet('announcements') || [];
       arr = arr.filter(a => a.id !== item.id);
@@ -255,14 +204,9 @@ const DB = {
       await firebaseReady;
       if (isOnline && _db && item.firestoreId) {
         try {
-          // ใช้ merge:true + แค่ field pinned — ไม่ spread Timestamp object
-          await _firestore.setDoc(
-            _firestore.doc(_db, 'hh_announcements', item.firestoreId),
-            { pinned: !item.pinned },
-            { merge: true }
-          );
+          await _firestore.setDoc(_firestore.doc(_db, 'hh_announcements', item.firestoreId), { pinned: !item.pinned }, { merge: true });
           return;
-        } catch (err) { console.warn('announcements.togglePin error:', err.message); }
+        } catch (e) { console.warn('togglePin:', e.message); }
       }
       let arr = _lsGet('announcements') || [];
       arr = arr.map(a => a.id === item.id ? { ...a, pinned: !a.pinned } : a);
@@ -272,26 +216,17 @@ const DB = {
     listenForNew(callback) {
       if (!isOnline || !_db) return () => {};
       try {
-        const q = _firestore.query(
-          _firestore.collection(_db, 'hh_announcements'),
-          _firestore.orderBy('ts', 'desc')
-        );
+        const q = _firestore.query(_firestore.collection(_db, 'hh_announcements'), _firestore.orderBy('ts', 'desc'));
         return _firestore.onSnapshot(q,
           snap => callback(snap.docs.map(d => ({ ...d.data(), firestoreId: d.id }))),
-          err  => console.warn('announcements listener error:', err.message)
+          err  => console.warn('announcements listener:', err.message)
         );
-      } catch (err) {
-        console.warn('announcements listenForNew error:', err.message);
-        return () => {};
-      }
+      } catch (e) { console.warn('announcements listenForNew:', e.message); return () => {}; }
     },
   },
 };
 
-
-/* ============================================================
-   D. TOAST
-   ============================================================ */
+/* ── Toast ── */
 function showToast(message, type = 'default', duration = 4000) {
   const container = document.getElementById('toastContainer');
   if (!container) return;
@@ -305,10 +240,7 @@ function showToast(message, type = 'default', duration = 4000) {
   }, duration);
 }
 
-
-/* ============================================================
-   E. CONFIRM DIALOG
-   ============================================================ */
+/* ── Confirm Dialog ── */
 function showConfirm(message, onConfirm, icon = '⚠️', title = 'ยืนยันการดำเนินการ') {
   const overlay   = document.getElementById('modal-confirm');
   const msgEl     = document.getElementById('confirmMsg');
@@ -326,52 +258,37 @@ function showConfirm(message, onConfirm, icon = '⚠️', title = 'ยืนย�
   const newCancel = cancelBtn.cloneNode(true);
   okBtn.parentNode.replaceChild(newOk, okBtn);
   cancelBtn.parentNode.replaceChild(newCancel, cancelBtn);
-
-  newOk.addEventListener('click', () => {
-    overlay.classList.remove('open');
-    if (typeof onConfirm === 'function') onConfirm();
-  });
+  newOk.addEventListener('click',     () => { overlay.classList.remove('open'); if (typeof onConfirm === 'function') onConfirm(); });
   newCancel.addEventListener('click', () => overlay.classList.remove('open'));
 }
 
+/* ── Modal ── */
+function openModal(id) { const el = document.getElementById('modal-' + id); if (el) el.classList.add('open'); }
+function closeModal(id) { const el = document.getElementById('modal-' + id); if (el) el.classList.remove('open'); }
 
-/* ============================================================
-   F. MODAL HELPERS
-   ============================================================ */
-function openModal(id) {
-  const el = document.getElementById('modal-' + id);
-  if (el) el.classList.add('open');
-}
-function closeModal(id) {
-  const el = document.getElementById('modal-' + id);
-  if (el) el.classList.remove('open');
-}
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.modal-overlay').forEach(overlay => {
-    overlay.addEventListener('click', function (e) {
+    overlay.addEventListener('click', function(e) {
       if (this.id === 'modal-confirm') return;
       if (e.target === this) this.classList.remove('open');
     });
   });
 });
 
-
-/* ============================================================
-   G. ACTIVITY LOG
-   ============================================================ */
+/* ── addLog — throttle 60s ป้องกัน quota leak ── */
 async function addLog(text) {
+  const now = Date.now();
+  if (text === _lastLogText && now - _lastLogTime < 60000) return;
+  _lastLogText = text;
+  _lastLogTime = now;
   await DB.push('logs', {
     text,
     time: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }),
   }, 30);
 }
 
-
-/* ============================================================
-   H. BOOTSTRAP — เริ่ม Firebase ทันที ไม่รอ DOMContentLoaded
-   ============================================================ */
+/* ── Bootstrap ── */
 (async function bootstrap() {
-  // localStorage availability check
   try {
     localStorage.setItem('__hh_test__', '1');
     localStorage.removeItem('__hh_test__');
@@ -379,11 +296,22 @@ async function addLog(text) {
     document.addEventListener('DOMContentLoaded', () => {
       const b = document.createElement('div');
       b.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:#b94040;color:#fff;text-align:center;padding:10px;font-size:0.84rem;font-family:Sarabun,sans-serif';
-      b.textContent   = '⚠️ กรุณาปิด Private Mode หรือเปิด Cookies';
+      b.textContent   = '⚠️ กรุณาปิด Private Mode หรือเปิด Cookies เพื่อใช้งานเว็บไซต์';
       document.body.prepend(b);
     });
   }
 
-  // เริ่ม Firebase init ทันที — ไม่รอ DOM
   await initFirebase();
+
+  // รอ DOM พร้อมก่อน dispatch — FIX race condition
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      _firebaseReadyResolve();
+      document.dispatchEvent(new CustomEvent('firebase:ready', { detail: { isOnline } }));
+    });
+  } else {
+    // DOM พร้อมแล้ว (script โหลดช้า)
+    _firebaseReadyResolve();
+    document.dispatchEvent(new CustomEvent('firebase:ready', { detail: { isOnline } }));
+  }
 })();

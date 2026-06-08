@@ -1,25 +1,13 @@
 /* ============================================================
-   notify.js — Notification System v5.0
+   notify.js — v6.1 FINAL
    ============================================================
-   ส่งแจ้งเตือนทั้งในเว็บ (Toast) และ LINE ทุก action
-   A. sendLineNotify  — ส่งไป Cloudflare Worker → LINE
-   B. notifyComment   — แจ้งเตือน comment ใหม่
-   C. notifyActivity  — แจ้งเตือนกิจกรรมใหม่
-   D. notifyBudget    — แจ้งเตือนงบประมาณใหม่
-   E. notifyAnnounce  — แจ้งเตือนประกาศใหม่
+   FIX: Toast เดียวต่อ action (ไม่ซ้อน)
    ============================================================ */
 
 'use strict';
 
-/* ============================================================
-   Worker URL — ✅ ไม่มี trailing slash
-   ============================================================ */
 const WORKER_URL = 'https://honest-hub-notify.peeza1482546.workers.dev';
 
-
-/* ============================================================
-   A. sendLineNotify — core function ส่งไป Worker
-   ============================================================ */
 async function sendLineNotify(payload) {
   try {
     const res = await fetch(WORKER_URL, {
@@ -27,33 +15,20 @@ async function sendLineNotify(payload) {
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify(payload),
     });
-
     if (!res.ok) {
       const errText = await res.text();
       throw new Error(`Worker ${res.status}: ${errText}`);
     }
-
-    const data = await res.json();
-    console.log('✅ LINE notification sent:', data);
     return true;
-
   } catch (err) {
-    // ไม่ให้ crash ระบบหลัก — notification เป็น non-critical
-    console.warn('LINE notify failed (non-critical):', err.message);
+    console.warn('LINE notify failed:', err.message);
     return false;
   }
 }
 
-
-/* ============================================================
-   B. notifyComment — ความคิดเห็นใหม่
-   ============================================================ */
+// FIX: Toast เดียว — รวม "ส่งแล้ว + แจ้งเตือนแล้ว" ในอันเดียว
 async function notifyComment(commentData) {
-  // Toast ในเว็บ
-  showToast('💬 มีความคิดเห็นใหม่จาก ' + commentData.name, 'info');
-
-  // LINE
-  await sendLineNotify({
+  const ok = await sendLineNotify({
     type:     'comment',
     name:     commentData.name,
     category: commentData.cat,
@@ -61,58 +36,44 @@ async function notifyComment(commentData) {
     date:     commentData.date,
     source:   'HONEST HUB — โรงเรียนเทศบาลจุ่งฮั่ว',
   });
-
-  // Toast ยืนยันการส่ง LINE
-  showToast('📬 แจ้งเตือนไลน์ผู้ดูแลระบบแล้ว', 'success');
+  showToast(
+    ok ? '📬 ส่งความคิดเห็นสำเร็จ และแจ้งเตือนไลน์ผู้ดูแลแล้ว' : '✅ ส่งความคิดเห็นสำเร็จ',
+    ok ? 'success' : 'default'
+  );
 }
 
-
-/* ============================================================
-   C. notifyActivity — กิจกรรมใหม่
-   ============================================================ */
 async function notifyActivity(activityData) {
   showToast('📅 เพิ่มกิจกรรมใหม่: ' + activityData.name, 'info');
-
   await sendLineNotify({
     type:     'activity',
     name:     'ผู้ดูแลระบบ',
     category: activityData.status || 'กิจกรรม',
     message:  activityData.name + (activityData.desc ? '\n' + activityData.desc : ''),
-    date:     activityData.date || '',
+    date:     activityData.dateDisplay || '',
     source:   'HONEST HUB — โรงเรียนเทศบาลจุ่งฮั่ว',
   });
 }
 
-
-/* ============================================================
-   D. notifyBudget — งบประมาณใหม่
-   ============================================================ */
 async function notifyBudget(budgetData) {
   showToast('💰 เพิ่มรายการงบประมาณใหม่: ' + budgetData.name, 'info');
-
   await sendLineNotify({
     type:     'budget',
     name:     'ผู้ดูแลระบบ',
     category: 'งบประมาณ',
     message:  budgetData.name + ' — ' + Number(budgetData.amount).toLocaleString('th-TH') + ' บาท',
-    date:     new Date().toLocaleDateString('th-TH'),
+    date:     budgetData.dateDisplay || new Date().toLocaleDateString('th-TH'),
     source:   'HONEST HUB — โรงเรียนเทศบาลจุ่งฮั่ว',
   });
 }
 
-
-/* ============================================================
-   E. notifyAnnounce — ประกาศใหม่
-   ============================================================ */
 async function notifyAnnounce(announceData) {
-  showToast('📢 ประกาศใหม่: ' + announceData.title, 'info');
-
+  showToast('📢 เผยแพร่ประกาศ: ' + announceData.title, 'info');
   await sendLineNotify({
     type:     'announcement',
     name:     'ผู้ดูแลระบบ',
-    category: announceData.category || 'ประกาศ',
+    category: ANNOUNCE_TYPES?.[announceData.type]?.label || 'ประกาศ',
     message:  announceData.title + (announceData.body ? '\n' + announceData.body : ''),
-    date:     announceData.date || new Date().toLocaleDateString('th-TH'),
+    date:     announceData.dateDisplay || new Date().toLocaleDateString('th-TH'),
     source:   'HONEST HUB — โรงเรียนเทศบาลจุ่งฮั่ว',
   });
 }

@@ -1,14 +1,20 @@
 /* ============================================================
-   budget.js — Budget Hub v5.0
+   budget.js — v6.1 FINAL
+   ============================================================
+   FIX:
+   - Seed data มี id field ครบทุก item
+   - เพิ่มรายการใหม่ที่หัว (unshift) สอดคล้องกับ activity
+   - deleteRow ใช้ id แทน DOM index
+   - _budgetInitDone flag declared ถูกต้อง
    ============================================================ */
 
 'use strict';
 
 const SEED_BUDGET_DATA = [
-  { name: 'วันไหว้ครูประจำปี 2567',      amount: 15000, status: 'done'     },
-  { name: 'โครงการอบรมคุณธรรมจริยธรรม', amount: 28500, status: 'progress' },
-  { name: 'กีฬาสีประจำปี',               amount: 45000, status: 'pending'  },
-  { name: 'โครงการห้องสมุดมีชีวิต',     amount: 12000, status: 'done'     },
+  { id:'seed-b1', name:'วันไหว้ครูประจำปี 2567',      amount:15000, status:'done',     dateDisplay:'8 มิ.ย. 2567' },
+  { id:'seed-b2', name:'โครงการอบรมคุณธรรมจริยธรรม', amount:28500, status:'progress', dateDisplay:'มิถุนายน 2567' },
+  { id:'seed-b3', name:'กีฬาสีประจำปี',               amount:45000, status:'pending',  dateDisplay:'กรกฎาคม 2567' },
+  { id:'seed-b4', name:'โครงการห้องสมุดมีชีวิต',      amount:12000, status:'done',     dateDisplay:'พฤษภาคม 2567' },
 ];
 
 const BADGE_MAP = {
@@ -17,20 +23,19 @@ const BADGE_MAP = {
   pending:  '<span class="badge badge-pending">○ ยังไม่เริ่ม</span>',
 };
 
-// seed init flag — ทำครั้งเดียวต่อ session
+// FIX: declared ที่ระดับ module scope
 let _budgetInitDone = false;
 
+/* ── Render ── */
 async function renderBudgetRows() {
   const tbody = document.getElementById('budgetBody');
   tbody.innerHTML = '';
 
-  // seed init ครั้งเดียว
   if (!_budgetInitDone) {
     const hasSeeded = await DB.get('budgetSeeded');
     if (!hasSeeded) {
       await DB.set('budgetData',   SEED_BUDGET_DATA);
       await DB.set('budgetSeeded', true);
-      console.log('✅ Budget seed data initialized');
     }
     _budgetInitDone = true;
   }
@@ -40,20 +45,20 @@ async function renderBudgetRows() {
   toggleBudgetEmpty();
 }
 
+/* ── Build row ── */
 function buildBudgetRow(item, rowNum) {
   const tr = document.createElement('tr');
 
-  const tdNum    = document.createElement('td');
+  const tdNum = document.createElement('td');
   tdNum.textContent = rowNum;
 
-  const tdName   = document.createElement('td');
+  const tdName = document.createElement('td');
   tdName.textContent = item.name;
 
   const tdAmount = document.createElement('td');
   tdAmount.textContent = Number(item.amount).toLocaleString('th-TH');
 
-  // วันที่ (ถ้ามี)
-  const tdDate   = document.createElement('td');
+  const tdDate = document.createElement('td');
   tdDate.textContent = item.dateDisplay || '—';
 
   const tdStatus = document.createElement('td');
@@ -64,13 +69,15 @@ function buildBudgetRow(item, rowNum) {
   const delBtn = document.createElement('button');
   delBtn.className   = 'btn btn-red';
   delBtn.textContent = 'ลบ';
-  delBtn.onclick     = () => deleteBudgetRow(delBtn);
+  // FIX: ใช้ item.id แทน DOM index
+  delBtn.onclick = () => deleteBudgetRow(item.id);
   tdAction.appendChild(delBtn);
 
   tr.append(tdNum, tdName, tdAmount, tdDate, tdStatus, tdAction);
   return tr;
 }
 
+/* ── Add ── */
 async function addBudgetRow() {
   const nameInput   = document.getElementById('bName');
   const amountInput = document.getElementById('bAmount');
@@ -82,10 +89,10 @@ async function addBudgetRow() {
   nameErr.classList.remove('show');
   amountErr.classList.remove('show');
 
-  const name      = nameInput.value.trim();
-  const amount    = amountInput.value.trim();
-  const status    = statusSel.value;
-  const dateVal   = dateInput ? dateInput.value : '';
+  const name    = nameInput.value.trim();
+  const amount  = amountInput.value.trim();
+  const status  = statusSel.value;
+  const dateVal = dateInput ? dateInput.value : '';
 
   let valid = true;
   if (!name) {
@@ -107,37 +114,43 @@ async function addBudgetRow() {
   }
   if (!valid) return;
 
-  // แปลง date → display string
   const dateDisplay = dateVal ? formatDateDisplay(dateVal) : '—';
+  const newItem = {
+    id: 'b-' + Date.now(),
+    name,
+    amount: Math.round(amountNum),
+    status,
+    dateDisplay,
+  };
 
-  const newItem = { name, amount: Math.round(amountNum), status, dateDisplay };
-  const data    = (await DB.get('budgetData')) || [];
-  data.push(newItem);
+  // FIX: เพิ่มที่หัว (unshift) สอดคล้องกับ activity
+  const data = (await DB.get('budgetData')) || [];
+  data.unshift(newItem);
   await DB.set('budgetData', data);
 
   await renderBudgetRows();
   await addLog('เพิ่มรายการงบประมาณ: ' + name);
   closeBudgetModal();
-
-  // แจ้งเตือน
   await notifyBudget(newItem);
 }
 
-function deleteBudgetRow(btn) {
+/* ── Delete — ใช้ id แทน index ── */
+function deleteBudgetRow(itemId) {
   if (!isAdmin) return;
-  const tr      = btn.closest('tr');
-  const rows    = Array.from(document.getElementById('budgetBody').querySelectorAll('tr'));
-  const rowIdx  = rows.indexOf(tr);
-
-  showConfirm('ต้องการลบรายการงบประมาณนี้?', async () => {
-    const data = (await DB.get('budgetData')) || [];
-    data.splice(rowIdx, 1);
-    await DB.set('budgetData', data);
-    await renderBudgetRows();
-    showToast('🗑️ ลบรายการเรียบร้อยแล้ว');
-  }, '🗑️', 'ลบรายการงบประมาณ');
+  showConfirm(
+    'ต้องการลบรายการงบประมาณนี้?',
+    async () => {
+      const data    = (await DB.get('budgetData')) || [];
+      const updated = data.filter(item => item.id !== itemId);
+      await DB.set('budgetData', updated);
+      await renderBudgetRows();
+      showToast('🗑️ ลบรายการเรียบร้อยแล้ว');
+    },
+    '🗑️', 'ลบรายการงบประมาณ'
+  );
 }
 
+/* ── Empty state ── */
 function toggleBudgetEmpty() {
   const tbody   = document.getElementById('budgetBody');
   const emptyEl = document.getElementById('budgetEmpty');
@@ -148,6 +161,7 @@ function toggleBudgetEmpty() {
   if (tableEl) tableEl.style.display = isEmpty ? 'none' : 'table';
 }
 
+/* ── Close modal ── */
 function closeBudgetModal() {
   ['bName','bAmount'].forEach(id => { document.getElementById(id).value = ''; });
   const bDate = document.getElementById('bDate');
@@ -158,18 +172,25 @@ function closeBudgetModal() {
   closeModal('addBudget');
 }
 
-// Block non-numeric
+/* ── Block non-numeric ── */
 document.addEventListener('DOMContentLoaded', () => {
-  const amountInput = document.getElementById('bAmount');
-  if (!amountInput) return;
-  amountInput.addEventListener('keydown', e => {
+  const input = document.getElementById('bAmount');
+  if (!input) return;
+  input.addEventListener('keydown', e => {
     const allowed = ['Backspace','Delete','Tab','ArrowLeft','ArrowRight','Enter','Home','End'];
     if (!(e.key >= '0' && e.key <= '9') && !allowed.includes(e.key) && !e.ctrlKey && !e.metaKey)
       e.preventDefault();
   });
-  amountInput.addEventListener('paste', e => {
+  input.addEventListener('paste', e => {
     e.preventDefault();
     const cleaned = (e.clipboardData || window.clipboardData).getData('text').replace(/[^0-9]/g, '');
-    if (cleaned) document.execCommand('insertText', false, cleaned);
+    if (cleaned) {
+      const start   = input.selectionStart;
+      const end     = input.selectionEnd;
+      // FIX: ใช้ direct value assignment แทน execCommand (deprecated)
+      input.value   = input.value.slice(0, start) + cleaned + input.value.slice(end);
+      input.setSelectionRange(start + cleaned.length, start + cleaned.length);
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    }
   });
 });

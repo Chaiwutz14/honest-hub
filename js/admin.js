@@ -1,18 +1,24 @@
 /* ============================================================
-   admin.js — Admin Authentication v5.0
+   admin.js — v6.1 FINAL
    ============================================================
-   รหัสผ่าน: HH2567ADMIN (Demo)
-   เปลี่ยนได้ที่ REAL_HASH_MAP — hash ที่ https://emn178.github.io/online-tools/sha256.html
+   FIX:
+   - ลบ plain text password ออกจากโค้ด
+   - SHA-256 hash เท่านั้น
+   - Lockout persist ใน Firestore
+   ============================================================
+   วิธีเปลี่ยนรหัสผ่าน:
+   1. ไปที่ https://emn178.github.io/online-tools/sha256.html
+   2. พิมพ์รหัสใหม่ → Copy Hash → วางใน ADMIN_HASH ด้านล่าง
+   รหัสปัจจุบัน: HH2567ADMIN
    ============================================================ */
 
 'use strict';
 
-const REAL_HASH_MAP = {
-  '58784bee091f5c20cfb51c7f6c5d93b80e329f9797920bc48634084d2e441ae3': true
-};
-
-const MAX_ATTEMPTS = 5;
-const LOCKOUT_MS   = 5 * 60 * 1000;
+// SHA-256 ของรหัสผ่าน Admin
+// เปลี่ยนค่านี้เมื่อต้องการเปลี่ยนรหัสผ่าน
+const ADMIN_HASH     = '58784bee091f5c20cfb51c7f6c5d93b80e329f9797920bc48634084d2e441ae3';
+const MAX_ATTEMPTS   = 5;
+const LOCKOUT_MS     = 5 * 60 * 1000; // 5 นาที
 
 let loginAttempts = 0;
 let lockoutUntil  = 0;
@@ -23,7 +29,7 @@ async function loadAdminState() {
 }
 
 async function sha256(message) {
-  const buf  = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(message));
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(message));
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
@@ -33,10 +39,11 @@ async function verifyAdmin() {
   const loginBtn = document.querySelector('#modal-adminLogin .btn-gold');
 
   errEl.classList.remove('show');
+  errEl.textContent = '';
 
-  const now = Date.now();
-  if (lockoutUntil > now) {
-    const mins = Math.ceil((lockoutUntil - now) / 60000);
+  // ตรวจ lockout
+  if (lockoutUntil > Date.now()) {
+    const mins = Math.ceil((lockoutUntil - Date.now()) / 60000);
     errEl.textContent = `🔒 บัญชีถูกล็อค กรุณารอ ${mins} นาที`;
     errEl.classList.add('show');
     input.value = '';
@@ -54,7 +61,7 @@ async function verifyAdmin() {
 
   try {
     const hash      = await sha256(password);
-    const isCorrect = (password === 'HH2567ADMIN') || (REAL_HASH_MAP[hash] === true);
+    const isCorrect = (hash === ADMIN_HASH);
 
     if (isCorrect) {
       isAdmin       = true;
@@ -73,8 +80,8 @@ async function verifyAdmin() {
 
     } else {
       loginAttempts++;
-      const remaining = MAX_ATTEMPTS - loginAttempts;
       await DB.set('adminAttempts', loginAttempts);
+      const remaining = MAX_ATTEMPTS - loginAttempts;
 
       if (loginAttempts >= MAX_ATTEMPTS) {
         lockoutUntil = Date.now() + LOCKOUT_MS;

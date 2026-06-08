@@ -1,19 +1,17 @@
 /* ============================================================
-   activity.js — Activity Hub v5.1
-   🔧 FIX: รอ DB.ready() ก่อนทุก operation
-           แยก seed init ออกจาก render loop
+   activity.js — v6.1 FINAL
    ============================================================ */
 
 'use strict';
 
 const SEED_ACTIVITY_DATA = [
-  { id:'seed-1', name:'โครงการอบรมคุณธรรมจริยธรรม',
-    desc:'อบรมนักเรียนระดับมัธยมศึกษาเกี่ยวกับคุณธรรม จริยธรรม และการเป็นพลเมืองดี',
+  { id:'seed-a1', name:'โครงการอบรมคุณธรรมจริยธรรม',
+    desc:'อบรมนักเรียนระดับมัธยมศึกษาเกี่ยวกับคุณธรรม จริยธรรม และการเป็นพลเมืองดี โดยวิทยากรจากภายนอก',
     dateDisplay:'มิถุนายน 2567', status:'ongoing' },
-  { id:'seed-2', name:'กีฬาสีประจำปี 2567',
-    desc:'การแข่งขันกีฬาประจำปีของโรงเรียน แบ่งเป็น 4 สี พร้อมกิจกรรมเชียร์ลีดเดอร์',
+  { id:'seed-a2', name:'กีฬาสีประจำปี 2567',
+    desc:'การแข่งขันกีฬาประจำปีของโรงเรียน แบ่งเป็น 4 สี พร้อมกิจกรรมเชียร์ลีดเดอร์และพิธีเปิดอย่างยิ่งใหญ่',
     dateDisplay:'กรกฎาคม 2567', status:'upcoming' },
-  { id:'seed-3', name:'วันไหว้ครูประจำปี 2567',
+  { id:'seed-a3', name:'วันไหว้ครูประจำปี 2567',
     desc:'พิธีไหว้ครูและมอบทุนการศึกษาให้กับนักเรียนที่มีผลการเรียนดีเด่น',
     dateDisplay:'พฤษภาคม 2567', status:'done' },
 ];
@@ -24,21 +22,17 @@ const ACTIVITY_STATUS = {
   done:     { label:'เสร็จสิ้นแล้ว',  tagClass:'activity-tag activity-tag--done',  imgClass:'activity-img activity-img--warm' },
 };
 
-// flag ว่า seed init ทำแล้วหรือยัง (ในหน่วยความจำ ไม่ต้องถามDB ซ้ำ)
 let _activityInitDone = false;
 
 async function renderActivityCards() {
   const grid = document.getElementById('activityGrid');
   grid.innerHTML = '';
 
-  // ทำ seed init ครั้งเดียว
   if (!_activityInitDone) {
     const hasSeeded = await DB.get('activitySeeded');
     if (!hasSeeded) {
-      // เปิดครั้งแรกจริงๆ — ใส่ seed data
       await DB.set('activityData',   SEED_ACTIVITY_DATA);
       await DB.set('activitySeeded', true);
-      console.log('✅ Activity seed data initialized');
     }
     _activityInitDone = true;
   }
@@ -61,7 +55,7 @@ function buildActivityCard(item) {
   const body = document.createElement('div');
   body.className = 'activity-body';
 
-  const tag  = document.createElement('div');
+  const tag = document.createElement('div');
   tag.className   = st.tagClass;
   tag.textContent = st.label;
 
@@ -69,7 +63,7 @@ function buildActivityCard(item) {
   title.className   = 'activity-title';
   title.textContent = item.name;
 
-  const desc  = document.createElement('div');
+  const desc = document.createElement('div');
   desc.className   = 'activity-desc';
   desc.textContent = item.desc || '—';
 
@@ -83,7 +77,9 @@ function buildActivityCard(item) {
   const delBtn = document.createElement('button');
   delBtn.className   = 'btn btn-red admin-only';
   delBtn.textContent = 'ลบ';
-  delBtn.onclick     = () => removeActivityCard(item.id);
+  delBtn.setAttribute('aria-label', 'ลบกิจกรรม ' + item.name);
+  // ใช้ id แทน DOM reference
+  delBtn.onclick = () => removeActivityCard(item.id);
 
   footer.appendChild(dateEl);
   footer.appendChild(delBtn);
@@ -100,7 +96,6 @@ async function addActivityCard() {
   const nameErr   = document.getElementById('aNameError');
 
   nameErr.classList.remove('show');
-
   const name    = nameInput.value.trim();
   const desc    = descInput.value.trim();
   const status  = statusSel.value;
@@ -114,12 +109,11 @@ async function addActivityCard() {
   }
 
   const dateDisplay = dateVal ? formatDateDisplay(dateVal) : '—';
-  const newItem     = { id: 'act-' + Date.now(), name, desc, dateDisplay, status };
+  const newItem = { id: 'act-' + Date.now(), name, desc, dateDisplay, status };
 
-  // อ่านข้อมูลปัจจุบัน → เพิ่ม → บันทึก
-  const current = (await DB.get('activityData')) || [];
-  current.unshift(newItem);
-  await DB.set('activityData',   current);
+  const data = (await DB.get('activityData')) || [];
+  data.unshift(newItem);
+  await DB.set('activityData',   data);
   await DB.set('activitySeeded', true);
 
   await renderActivityCards();
@@ -133,8 +127,8 @@ function removeActivityCard(id) {
   showConfirm(
     'ต้องการลบกิจกรรมนี้?',
     async () => {
-      const current = (await DB.get('activityData')) || [];
-      const updated = current.filter(item => item.id !== id);
+      const data    = (await DB.get('activityData')) || [];
+      const updated = data.filter(item => item.id !== id);
       await DB.set('activityData', updated);
       await renderActivityCards();
       showToast('🗑️ ลบกิจกรรมเรียบร้อยแล้ว');

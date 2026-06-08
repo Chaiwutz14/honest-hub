@@ -17,6 +17,15 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+  <noscript>
+    <div style="position:fixed;inset:0;background:#0a1628;color:#fff;display:flex;align-items:center;justify-content:center;font-family:Sarabun,sans-serif;font-size:1rem;text-align:center;padding:24px;z-index:99999;">
+      <div>
+        <div style="font-size:3rem;margin-bottom:16px;">⚠️</div>
+        <div style="font-size:1.2rem;margin-bottom:8px;">จำเป็นต้องเปิดใช้งาน JavaScript</div>
+        <div style="color:rgba(255,255,255,0.6);">กรุณาเปิดใช้งาน JavaScript ในเบราว์เซอร์เพื่อใช้งาน HONEST HUB</div>
+      </div>
+    </div>
+  </noscript>
 
   <!-- Toast -->
   <div id="toastContainer" role="status" aria-live="polite"></div>
@@ -205,6 +214,11 @@
         <div class="action-row">
           <button class="btn btn-gold admin-only" onclick="openModal('addBudget')">+ เพิ่มรายการงบประมาณ</button>
         </div>
+        <div class="skeleton-loader" style="display:none">
+          <div class="skeleton-row"></div>
+          <div class="skeleton-row"></div>
+          <div class="skeleton-row"></div>
+        </div>
         <div class="table-scroll">
           <table id="budgetTable" aria-label="ตารางงบประมาณ">
             <thead>
@@ -245,6 +259,10 @@
         <p class="section-sub">ข้อมูลกิจกรรมที่กำลังดำเนินการและกำลังจะมาถึง</p>
         <div class="action-row">
           <button class="btn btn-gold admin-only" onclick="openModal('addActivity')">+ เพิ่มกิจกรรม</button>
+        </div>
+        <div class="skeleton-loader" style="display:none">
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
         </div>
         <div class="activity-grid" id="activityGrid" role="list"></div>
         <div class="empty-state" id="activityEmpty" style="display:none">
@@ -561,17 +579,6 @@
   <script src="js/voice.js"></script>
   <script src="js/announcement.js"></script>
   <script src="js/dashboard.js"></script>
-  <script>
-    /* ── Filter Announcements ── */
-    function filterAnnounce(btn, type) {
-      document.querySelectorAll('.announce-filter-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      document.querySelectorAll('.announce-card').forEach(card => {
-        card.style.display = (type === 'all' || card.querySelector('.announce-badge').dataset.type === type)
-          ? '' : 'none';
-      });
-    }
-  </script>
 
 </body>
 </html>
