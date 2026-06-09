@@ -60,10 +60,14 @@ function _renderAnnouncementList(rawData) {
   const now = new Date();
 
   // กรองหมดอายุ (ยกเว้นปักหมุด)
+  // FIX: นับถึงสิ้นวัน 23:59:59 ของวันหมดอายุ
   let data = rawData.filter(item => {
     if (item.pinned) return true;
     if (!item.expireDate) return true;
-    return new Date(item.expireDate) >= now;
+    // สร้าง Date ของวันหมดอายุ + ตั้งเวลาเป็น 23:59:59
+    const expireEnd = new Date(item.expireDate);
+    expireEnd.setHours(23, 59, 59, 999);
+    return expireEnd >= now;
   });
 
   // เรียงลำดับ: ปักหมุด → ด่วน → ล่าสุด
@@ -270,4 +274,44 @@ function closeAnnounceModal() {
   const err = document.getElementById('anTitleError');
   if (err) err.classList.remove('show');
   closeModal('addAnnouncement');
+}
+
+/* ── initAnnounceModal — ตั้งค่า default วันที่ตอนเปิด modal ── */
+function initAnnounceModal() {
+  const today    = new Date();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  const fmt = d => d.toISOString().split('T')[0];
+
+  const anDate   = document.getElementById('anDate');
+  const anExpire = document.getElementById('anExpire');
+
+  if (anDate) {
+    anDate.value = fmt(today);
+    anDate.min   = fmt(today);
+    // trigger datepicker preview
+    anDate.dispatchEvent(new Event('change'));
+
+    // เมื่อเปลี่ยนวันประกาศ → อัปเดต min ของวันหมดอายุ
+    anDate.addEventListener('change', function() {
+      if (anExpire) {
+        anExpire.min = this.value || fmt(today);
+        // ถ้าวันหมดอายุน้อยกว่าวันประกาศ → reset
+        if (anExpire.value && anExpire.value < this.value) {
+          anExpire.value = this.value;
+          anExpire.dispatchEvent(new Event('change'));
+        }
+      }
+    }, { once: false });
+  }
+
+  if (anExpire) {
+    // default = วันนี้ (ประกาศ 1 วัน)
+    anExpire.value = fmt(today);
+    anExpire.min   = fmt(today);
+    anExpire.dispatchEvent(new Event('change'));
+  }
+
+  openModal('addAnnouncement');
 }

@@ -201,7 +201,7 @@
       <h2 class="section-title">ประกาศทั้งหมด</h2>
       <p class="section-sub">อัปเดตโดยผู้ดูแลระบบ · ประกาศที่หมดอายุจะถูกซ่อนอัตโนมัติ</p>
       <div class="action-row">
-        <button class="btn btn-gold admin-only" onclick="openModal('addAnnouncement')">+ เพิ่มประกาศ</button>
+        <button class="btn btn-gold admin-only" onclick="initAnnounceModal()">+ เพิ่มประกาศ</button>
       </div>
       <div class="announce-filter">
         <button class="announce-filter-btn active" onclick="filterAnnounce(this,'all')">ทั้งหมด</button>
@@ -572,9 +572,12 @@
       <input type="date" id="anDate" data-datepicker>
     </div>
     <div class="form-group">
-      <label>วันหมดอายุ (ไม่กรอก = แสดงตลอด)</label>
+      <label>วันหมดอายุ <span style="font-weight:400;color:var(--text-muted);">(ไม่กรอก = แสดงตลอด)</span></label>
       <input type="date" id="anExpire" data-datepicker>
-      <small style="color:var(--text-muted);font-size:0.74rem;">ประกาศจะถูกซ่อนอัตโนมัติหลังวันนี้</small>
+      <small style="color:var(--text-muted);font-size:0.74rem;display:block;margin-top:4px;line-height:1.6;">
+        💡 ถ้าประกาศ <strong>1 วัน</strong> → เลือกวันเดียวกับวันประกาศได้เลย<br>
+        ระบบจะแสดงถึง <strong>23:59 น.</strong> ของวันนั้น แล้วซ่อนอัตโนมัติ
+      </small>
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeAnnounceModal()">ยกเลิก</button>
