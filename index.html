@@ -32,9 +32,10 @@
 <div id="toastContainer" role="status" aria-live="polite"></div>
 
 <!-- Urgent Banner -->
-<div id="urgentBanner" role="alert">
+<div id="urgentBanner" role="alert" style="cursor:pointer;" onclick="showPage('announcement')" title="คลิกเพื่อดูรายละเอียดประกาศ">
   <span class="urgent-label">🔴 ด่วน</span>
   <span class="urgent-text"></span>
+  <span style="flex-shrink:0;font-size:0.75rem;opacity:0.75;margin-left:auto;padding-left:12px;white-space:nowrap;">แตะเพื่อดูรายละเอียด →</span>
 </div>
 
 <!-- Confirm Dialog -->
@@ -67,9 +68,9 @@
     <a id="nav-announcement" onclick="showPage('announcement')" tabindex="0">📢 ประกาศ</a>
     <a id="nav-budget"       onclick="showPage('budget')"       tabindex="0">💰 งบประมาณ</a>
     <a id="nav-activity"     onclick="showPage('activity')"     tabindex="0">📅 กิจกรรม</a>
-    <a id="nav-dashboard"    onclick="showPage('dashboard')"    tabindex="0">📊 Dashboard</a>
     <a id="nav-voice"        onclick="showPage('voice')"        tabindex="0">💬 ความคิดเห็น</a>
     <a id="nav-integrity"    onclick="showPage('integrity')"    tabindex="0">⭐ คุณธรรม</a>
+    <a id="nav-dashboard"    onclick="showPage('dashboard')"    tabindex="0">📊 Dashboard</a>
   </div>
   <div class="nav-right">
     <button class="hamburger" id="hamburgerBtn" onclick="toggleMobileMenu()"
@@ -85,9 +86,9 @@
   <a id="mnav-announcement" onclick="showPage('announcement'); closeMobileMenu()">📢 ประกาศ</a>
   <a id="mnav-budget"       onclick="showPage('budget');       closeMobileMenu()">💰 งบประมาณ</a>
   <a id="mnav-activity"     onclick="showPage('activity');     closeMobileMenu()">📅 กิจกรรม</a>
-  <a id="mnav-dashboard"    onclick="showPage('dashboard');    closeMobileMenu()">📊 Dashboard</a>
   <a id="mnav-voice"        onclick="showPage('voice');        closeMobileMenu()">💬 ความคิดเห็น</a>
   <a id="mnav-integrity"    onclick="showPage('integrity');    closeMobileMenu()">⭐ คุณธรรม</a>
+  <a id="mnav-dashboard"    onclick="showPage('dashboard');    closeMobileMenu()">📊 Dashboard</a>
 </div>
 
 <!-- ==================== HOME ==================== -->
@@ -151,17 +152,9 @@
           <div class="hub-arrow">ดูกิจกรรม →</div>
         </div>
 
-        <div class="hub-card" onclick="showPage('dashboard')" tabindex="0" role="button">
-          <div class="hub-card-icon">📊</div>
-          <div class="hub-number">HUB 03</div>
-          <div class="hub-name">Dashboard</div>
-          <div class="hub-desc">สถิติผู้เข้าชมและข้อเสนอแนะ</div>
-          <div class="hub-arrow">ดูสถิติ →</div>
-        </div>
-
         <div class="hub-card" onclick="showPage('voice')" tabindex="0" role="button">
           <div class="hub-card-icon">💬</div>
-          <div class="hub-number">HUB 04</div>
+          <div class="hub-number">HUB 03</div>
           <div class="hub-name">ความคิดเห็น</div>
           <div class="hub-desc">แสดงความคิดเห็น ข้อเสนอแนะ</div>
           <div class="hub-arrow">แสดงความคิดเห็น →</div>
@@ -169,10 +162,18 @@
 
         <div class="hub-card" onclick="showPage('integrity')" tabindex="0" role="button">
           <div class="hub-card-icon">⭐</div>
-          <div class="hub-number">HUB 05</div>
+          <div class="hub-number">HUB 04</div>
           <div class="hub-name">คุณธรรม & ความซื่อสัตย์</div>
           <div class="hub-desc">ความรู้เรื่องความซื่อสัตย์และต้านทุจริต</div>
           <div class="hub-arrow">เรียนรู้ →</div>
+        </div>
+
+        <div class="hub-card" onclick="showPage('dashboard')" tabindex="0" role="button">
+          <div class="hub-card-icon">📊</div>
+          <div class="hub-number">HUB 05</div>
+          <div class="hub-name">Dashboard</div>
+          <div class="hub-desc">สถิติผู้เข้าชมและภาพรวมเว็บไซต์</div>
+          <div class="hub-arrow">ดูสถิติ →</div>
         </div>
 
       </div>
