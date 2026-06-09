@@ -11,10 +11,10 @@
 'use strict';
 
 const SEED_BUDGET_DATA = [
-  { id:'seed-b1', name:'วันไหว้ครูประจำปี 2567',      amount:15000, status:'done',     dateDisplay:'8 มิ.ย. 2567' },
-  { id:'seed-b2', name:'โครงการอบรมคุณธรรมจริยธรรม', amount:28500, status:'progress', dateDisplay:'มิถุนายน 2567' },
-  { id:'seed-b3', name:'กีฬาสีประจำปี',               amount:45000, status:'pending',  dateDisplay:'กรกฎาคม 2567' },
-  { id:'seed-b4', name:'โครงการห้องสมุดมีชีวิต',      amount:12000, status:'done',     dateDisplay:'พฤษภาคม 2567' },
+  { id:'seed-b1', name:'วันไหว้ครูประจำปี 2569',      amount:15000, status:'done',     dateDisplay:'8 มิ.ย. 2569' },
+  { id:'seed-b2', name:'โครงการอบรมคุณธรรมจริยธรรม', amount:28500, status:'progress', dateDisplay:'มิถุนายน 2569' },
+  { id:'seed-b3', name:'กีฬาสีประจำปี',               amount:45000, status:'pending',  dateDisplay:'กรกฎาคม 2569' },
+  { id:'seed-b4', name:'โครงการห้องสมุดมีชีวิต',      amount:12000, status:'done',     dateDisplay:'พฤษภาคม 2569' },
 ];
 
 const BADGE_MAP = {

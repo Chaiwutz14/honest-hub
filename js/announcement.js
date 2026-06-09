@@ -11,7 +11,7 @@
 'use strict';
 
 const ANNOUNCE_TYPES = {
-  urgent:   { label:'🔴 ด่วนมาก',   color:'#b94040', bg:'#fff0f0', border:'#f5c6c6' },
+  urgent:   { label:'🚨 ด่วนมาก',   color:'#b94040', bg:'#fff0f0', border:'#f5c6c6' },
   announce: { label:'📌 ประกาศ',     color:'#1a4a8a', bg:'#eef2ff', border:'#c3cfe2' },
   activity: { label:'📅 กิจกรรม',    color:'#2d7a4f', bg:'#f0faf4', border:'#a8d5b8' },
   mourning: { label:'🎗️ ไว้อาลัย',  color:'#333333', bg:'#f5f5f5', border:'#cccccc' },

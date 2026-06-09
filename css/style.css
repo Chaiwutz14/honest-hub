@@ -997,7 +997,78 @@ body.admin-active .admin-only-td { display:table-cell; }
   .hero-stat  { padding:6px 12px; font-size:0.76rem; }
 }
 
-/* Light theme — footer text visible */
-[data-theme="light"] .footer { background: var(--footer-bg, #1a2a4a) !important; }
-[data-theme="light"] .footer span, [data-theme="light"] .admin-key-btn { color: rgba(255,255,255,0.5) !important; }
+/* ============================================================
+   LIGHT MODE — complete override
+   ============================================================ */
+[data-theme="light"] .hero-wrapper { background: linear-gradient(160deg,#e8f0ff 0%,#d0dcf5 50%,#c8d8f8 100%) !important; }
+
+/* Hero text — เปลี่ยนเป็นสีเข้มทั้งหมด */
+[data-theme="light"] .hero-school-badge { background: rgba(27,79,138,0.1) !important; border-color: rgba(27,79,138,0.25) !important; color: var(--blue) !important; }
+[data-theme="light"] .hero-title        { color: #0F2345 !important; }
+[data-theme="light"] .hero-title-sub    { color: #C77C00 !important; }
+[data-theme="light"] .hero-divider span { background: rgba(15,35,69,0.2) !important; }
+[data-theme="light"] .hero-divider em   { color: #C77C00 !important; }
+[data-theme="light"] .hero-desc         { color: rgba(15,35,69,0.7) !important; }
+[data-theme="light"] .hero-stat         { background: rgba(27,79,138,0.08) !important; border-color: rgba(27,79,138,0.2) !important; color: #1E3251 !important; }
+[data-theme="light"] .hero-stat span    { color: #0F2345 !important; }
+[data-theme="light"] .hubs-label        { color: rgba(15,35,69,0.5) !important; }
+
+/* Hub cards ในธีมขาว */
+[data-theme="light"] .hub-card          { background: rgba(255,255,255,0.7) !important; border-color: rgba(27,79,138,0.15) !important; backdrop-filter: blur(12px); }
+[data-theme="light"] .hub-card:hover    { background: rgba(255,255,255,0.9) !important; border-color: rgba(27,79,138,0.3) !important; }
+[data-theme="light"] .hub-number        { color: rgba(15,35,69,0.45) !important; }
+[data-theme="light"] .hub-name          { color: #0F2345 !important; }
+[data-theme="light"] .hub-desc          { color: rgba(15,35,69,0.55) !important; }
+[data-theme="light"] .hub-card-icon     { background: rgba(27,79,138,0.1) !important; border-color: rgba(27,79,138,0.15) !important; }
+[data-theme="light"] .hub-arrow         { color: #C77C00 !important; }
+
+/* Decorative shapes ในธีมขาว */
+[data-theme="light"] .hero-deco-1 { background: rgba(245,158,11,0.12) !important; border-color: rgba(245,158,11,0.25) !important; }
+[data-theme="light"] .hero-deco-2 { background: rgba(16,185,129,0.12) !important; border-color: rgba(16,185,129,0.25) !important; }
+[data-theme="light"] .hero-deco-3 { background: rgba(27,79,138,0.08) !important; border-color: rgba(27,79,138,0.15) !important; }
+[data-theme="light"] .hero-dots   { background-image: radial-gradient(rgba(27,79,138,0.08) 1.5px, transparent 1.5px) !important; }
+
+/* Nav ในธีมขาว — ชัดเจนอยู่แล้ว */
+[data-theme="light"] nav { box-shadow: 0 2px 12px rgba(27,79,138,0.12) !important; }
+
+/* Inner header ยังคงสีน้ำเงิน */
 [data-theme="light"] .inner-header { background: linear-gradient(135deg,#1B4F8A,#2471C8) !important; }
+[data-theme="light"] .back-btn     { color: rgba(255,255,255,0.6) !important; }
+
+/* Footer ในธีมขาว — พื้นเข้มเสมอ */
+[data-theme="light"] .footer       { background: #1a2a4a !important; }
+[data-theme="light"] .footer span  { color: rgba(255,255,255,0.5) !important; }
+[data-theme="light"] .admin-key-btn { color: rgba(255,255,255,0.25) !important; }
+
+/* ============================================================
+   URGENT BANNER — Pulsing animation
+   ============================================================ */
+@keyframes urgentPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.6; transform: scale(1.3); }
+}
+@keyframes urgentBlink {
+  0%, 100% { background: #DC2626; }
+  50%       { background: #7F1D1D; }
+}
+
+.urgent-dot {
+  display: inline-block;
+  width: 10px; height: 10px;
+  background: #fff;
+  border-radius: 50%;
+  animation: urgentPulse 1s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+#urgentBanner {
+  animation: urgentBlink 2s ease-in-out infinite;
+}
+
+.urgent-label {
+  display: flex; align-items: center; gap: 6px;
+  font-weight: 700; font-size: 0.82rem;
+  background: rgba(0,0,0,0.2);
+  padding: 2px 10px; border-radius: 12px;
+  flex-shrink: 0;
+}

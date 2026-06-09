@@ -33,9 +33,12 @@
 
 <!-- Urgent Banner -->
 <div id="urgentBanner" role="alert" style="cursor:pointer;" onclick="showPage('announcement')" title="คลิกเพื่อดูรายละเอียดประกาศ">
-  <span class="urgent-label">🔴 ด่วน</span>
+  <span class="urgent-label">
+    <span class="urgent-dot" aria-hidden="true"></span>
+    ด่วน
+  </span>
   <span class="urgent-text"></span>
-  <span style="flex-shrink:0;font-size:0.75rem;opacity:0.75;margin-left:auto;padding-left:12px;white-space:nowrap;">แตะเพื่อดูรายละเอียด →</span>
+  <span style="flex-shrink:0;font-size:0.75rem;opacity:0.8;margin-left:auto;padding-left:12px;white-space:nowrap;letter-spacing:0.3px;">ดูรายละเอียด →</span>
 </div>
 
 <!-- Confirm Dialog -->
@@ -116,7 +119,7 @@
       </p>
 
       <div class="hero-stats">
-        <div class="hero-stat">🎓 <span>ม.1–ม.3</span></div>
+        <div class="hero-stat">🎓 <span>ม.1–ม.6</span></div>
         <div class="hero-stat">👁️ เปิดเผยข้อมูล</div>
         <div class="hero-stat">⚡ <span>Real-time</span></div>
         <div class="hero-stat">🔒 ปลอดภัย</div>
@@ -181,7 +184,7 @@
   </div>
 
   <footer class="footer">
-    <span>© 2568 HONEST HUB · โรงเรียนเทศบาลจุ่งฮั่ว จังหวัดพัทลุง</span>
+    <span>© 2569 HONEST HUB · โรงเรียนเทศบาลจุ่งฮั่ว จังหวัดพัทลุง</span>
     <button class="admin-key-btn" onclick="openModal('adminLogin')">เฉพาะผู้ดูแลระบบ 🔑</button>
   </footer>
 </div>
@@ -205,12 +208,12 @@
         <button class="btn btn-gold admin-only" onclick="initAnnounceModal()">+ เพิ่มประกาศ</button>
       </div>
       <div class="announce-filter">
-        <button class="announce-filter-btn active" onclick="filterAnnounce(this,'all')">ทั้งหมด</button>
-        <button class="announce-filter-btn" onclick="filterAnnounce(this,'urgent')">🔴 ด่วนมาก</button>
+        <button class="announce-filter-btn active" onclick="filterAnnounce(this,'all')">📋 ทั้งหมด</button>
+        <button class="announce-filter-btn" onclick="filterAnnounce(this,'urgent')">🚨 ด่วนมาก</button>
         <button class="announce-filter-btn" onclick="filterAnnounce(this,'announce')">📌 ประกาศ</button>
         <button class="announce-filter-btn" onclick="filterAnnounce(this,'activity')">📅 กิจกรรม</button>
         <button class="announce-filter-btn" onclick="filterAnnounce(this,'mourning')">🎗️ ไว้อาลัย</button>
-        <button class="announce-filter-btn" onclick="filterAnnounce(this,'general')">ℹ️ ทั่วไป</button>
+        <button class="announce-filter-btn" onclick="filterAnnounce(this,'general')">💬 ทั่วไป</button>
       </div>
       <div class="announce-grid" id="announcementGrid"></div>
       <div class="empty-state" id="announceEmpty" style="display:none">
@@ -220,7 +223,7 @@
     </div>
   </div>
   <footer class="footer">
-    <span>© 2568 HONEST HUB · โรงเรียนเทศบาลจุ่งฮั่ว จังหวัดพัทลุง</span>
+    <span>© 2569 HONEST HUB · โรงเรียนเทศบาลจุ่งฮั่ว จังหวัดพัทลุง</span>
     <button class="admin-key-btn" onclick="openModal('adminLogin')">เฉพาะผู้ดูแลระบบ 🔑</button>
   </footer>
 </div>
@@ -234,7 +237,7 @@
       <p>งบประมาณกิจกรรมโรงเรียนเทศบาลจุ่งฮั่ว</p>
       <div class="inner-header-meta">
         <span class="inner-header-badge">💰 Budget Hub</span>
-        <span class="inner-header-badge">📅 ปีงบประมาณ 2568</span>
+        <span class="inner-header-badge">📅 ปีงบประมาณ 2569</span>
       </div>
     </div>
     <div class="inner-body">
@@ -270,7 +273,7 @@
     </div>
   </div>
   <footer class="footer">
-    <span>© 2568 HONEST HUB · โรงเรียนเทศบาลจุ่งฮั่ว จังหวัดพัทลุง</span>
+    <span>© 2569 HONEST HUB · โรงเรียนเทศบาลจุ่งฮั่ว จังหวัดพัทลุง</span>
     <button class="admin-key-btn" onclick="openModal('adminLogin')">เฉพาะผู้ดูแลระบบ 🔑</button>
   </footer>
 </div>
@@ -304,7 +307,7 @@
     </div>
   </div>
   <footer class="footer">
-    <span>© 2568 HONEST HUB · โรงเรียนเทศบาลจุ่งฮั่ว จังหวัดพัทลุง</span>
+    <span>© 2569 HONEST HUB · โรงเรียนเทศบาลจุ่งฮั่ว จังหวัดพัทลุง</span>
     <button class="admin-key-btn" onclick="openModal('adminLogin')">เฉพาะผู้ดูแลระบบ 🔑</button>
   </footer>
 </div>
@@ -342,7 +345,7 @@
         <div class="dash-card dash-card--red">
           <div class="dash-num" id="budgetCount">0</div>
           <div class="dash-label">💰 รายการงบประมาณ</div>
-          <div class="dash-trend">ปีงบประมาณ 2568</div>
+          <div class="dash-trend">ปีงบประมาณ 2569</div>
         </div>
         <div class="dash-card dash-card--announce">
           <div class="dash-num" id="announceCount">0</div>
@@ -357,7 +360,7 @@
     </div>
   </div>
   <footer class="footer">
-    <span>© 2568 HONEST HUB · โรงเรียนเทศบาลจุ่งฮั่ว จังหวัดพัทลุง</span>
+    <span>© 2569 HONEST HUB · โรงเรียนเทศบาลจุ่งฮั่ว จังหวัดพัทลุง</span>
     <button class="admin-key-btn" onclick="openModal('adminLogin')">เฉพาะผู้ดูแลระบบ 🔑</button>
   </footer>
 </div>
@@ -413,7 +416,7 @@
     </div>
   </div>
   <footer class="footer">
-    <span>© 2568 HONEST HUB · โรงเรียนเทศบาลจุ่งฮั่ว จังหวัดพัทลุง</span>
+    <span>© 2569 HONEST HUB · โรงเรียนเทศบาลจุ่งฮั่ว จังหวัดพัทลุง</span>
     <button class="admin-key-btn" onclick="openModal('adminLogin')">เฉพาะผู้ดูแลระบบ 🔑</button>
   </footer>
 </div>
@@ -473,7 +476,7 @@
     </div>
   </div>
   <footer class="footer">
-    <span>© 2568 HONEST HUB · โรงเรียนเทศบาลจุ่งฮั่ว จังหวัดพัทลุง</span>
+    <span>© 2569 HONEST HUB · โรงเรียนเทศบาลจุ่งฮั่ว จังหวัดพัทลุง</span>
     <button class="admin-key-btn" onclick="openModal('adminLogin')">เฉพาะผู้ดูแลระบบ 🔑</button>
   </footer>
 </div>

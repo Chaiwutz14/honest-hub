@@ -7,13 +7,13 @@
 const SEED_ACTIVITY_DATA = [
   { id:'seed-a1', name:'โครงการอบรมคุณธรรมจริยธรรม',
     desc:'อบรมนักเรียนระดับมัธยมศึกษาเกี่ยวกับคุณธรรม จริยธรรม และการเป็นพลเมืองดี โดยวิทยากรจากภายนอก',
-    dateDisplay:'มิถุนายน 2567', status:'ongoing' },
-  { id:'seed-a2', name:'กีฬาสีประจำปี 2567',
+    dateDisplay:'มิถุนายน 2569', status:'ongoing' },
+  { id:'seed-a2', name:'กีฬาสีประจำปี 2569',
     desc:'การแข่งขันกีฬาประจำปีของโรงเรียน แบ่งเป็น 4 สี พร้อมกิจกรรมเชียร์ลีดเดอร์และพิธีเปิดอย่างยิ่งใหญ่',
-    dateDisplay:'กรกฎาคม 2567', status:'upcoming' },
-  { id:'seed-a3', name:'วันไหว้ครูประจำปี 2567',
+    dateDisplay:'กรกฎาคม 2569', status:'upcoming' },
+  { id:'seed-a3', name:'วันไหว้ครูประจำปี 2569',
     desc:'พิธีไหว้ครูและมอบทุนการศึกษาให้กับนักเรียนที่มีผลการเรียนดีเด่น',
-    dateDisplay:'พฤษภาคม 2567', status:'done' },
+    dateDisplay:'พฤษภาคม 2569', status:'done' },
 ];
 
 const ACTIVITY_STATUS = {
