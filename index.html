@@ -1,630 +1,165 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="th" data-theme="sky">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HONEST HUB — โรงเรียนเทศบาลจุ่งฮั่ว จังหวัดพัทลุง</title>
-  <meta name="description" content="ศูนย์กลางความโปร่งใสโรงเรียนเทศบาลจุ่งฮั่ว จังหวัดพัทลุง">
-  <meta name="author"      content="โรงเรียนเทศบาลจุ่งฮั่ว">
-  <meta property="og:title"       content="HONEST HUB — โรงเรียนเทศบาลจุ่งฮั่ว">
-  <meta property="og:description" content="ศูนย์กลางความโปร่งใสโรงเรียนเทศบาลจุ่งฮั่ว จังหวัดพัทลุง">
-  <meta property="og:type"   content="website">
-  <meta property="og:locale" content="th_TH">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏫</text></svg>">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@300;400;500;600&family=Sarabun:wght@300;400;500;600&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
+  <meta name="description" content="Diamond Cute Studio 💎 บริการพิมพ์ภาพโพลารอยด์ นามบัตร บัตรแขวนคอ ป้ายร้านค้า QR Code คุณภาพระดับมืออาชีพ ส่งทั่วไทย">
+  <title>Diamond Cute Studio 💎 — หน้าแรก</title>
+  <script src="js/theme-init.js"></script>
+  <link rel="stylesheet" href="css/themes.css">
+  <link rel="stylesheet" href="css/loading.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/navbar.css">
+  <link rel="stylesheet" href="css/home.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💎</text></svg>">
 </head>
 <body>
 
-<noscript>
-  <div style="position:fixed;inset:0;background:#0F2345;color:#fff;display:flex;align-items:center;justify-content:center;font-family:Sarabun,sans-serif;font-size:1rem;text-align:center;padding:24px;z-index:99999;">
-    <div>
-      <div style="font-size:3rem;margin-bottom:16px;">⚠️</div>
-      <div style="font-size:1.2rem;margin-bottom:8px;">จำเป็นต้องเปิดใช้งาน JavaScript</div>
-      <div style="color:rgba(255,255,255,0.6);">กรุณาเปิดใช้งาน JavaScript ในเบราว์เซอร์เพื่อใช้งาน HONEST HUB</div>
-    </div>
-  </div>
-</noscript>
+<a class="skip-link" href="#main-content">ข้ามไปเนื้อหาหลัก</a>
+<div id="navbar-mount"></div>
 
-<!-- Toast -->
-<div id="toastContainer" role="status" aria-live="polite"></div>
-
-<!-- Urgent Banner -->
-<div id="urgentBanner" role="alert" style="cursor:pointer;" onclick="showPage('announcement')" title="คลิกเพื่อดูรายละเอียดประกาศ">
-  <span class="urgent-label">
-    <span class="urgent-dot" aria-hidden="true"></span>
-    ด่วน
-  </span>
-  <span class="urgent-text"></span>
-  <span style="flex-shrink:0;font-size:0.75rem;opacity:0.8;margin-left:auto;padding-left:12px;white-space:nowrap;letter-spacing:0.3px;">ดูรายละเอียด →</span>
-</div>
-
-<!-- Confirm Dialog -->
-<div class="modal-overlay" id="modal-confirm">
-  <div class="modal modal--sm">
-    <div class="confirm-icon"  id="confirmIcon">⚠️</div>
-    <div class="confirm-title" id="confirmTitle">ยืนยันการดำเนินการ</div>
-    <div class="confirm-msg"   id="confirmMsg"></div>
-    <div class="modal-footer modal-footer--center">
-      <button class="btn btn-outline" id="confirmCancelBtn">ยกเลิก</button>
-      <button class="btn btn-red"     id="confirmOkBtn">ยืนยัน</button>
-    </div>
-  </div>
-</div>
-
-<!-- Admin Bar -->
-<div id="adminBar" role="alert">
-  <span>🔑 โหมดผู้ดูแลระบบ — คุณมีสิทธิ์แก้ไขข้อมูลทั้งหมด</span>
-  <button onclick="adminLogout()">ออกจากระบบ ×</button>
-</div>
-
-<!-- NAV -->
-<nav role="navigation" aria-label="เมนูหลัก">
-  <a class="nav-logo" onclick="showPage('home')" tabindex="0">
-    <div class="nav-logo-icon">🏫</div>
-    <span>HONEST HUB</span>
-  </a>
-  <div class="nav-links" id="navLinks">
-    <a id="nav-home"         onclick="showPage('home')"         tabindex="0">🏠 หน้าหลัก</a>
-    <a id="nav-announcement" onclick="showPage('announcement')" tabindex="0">📢 ประกาศ</a>
-    <a id="nav-budget"       onclick="showPage('budget')"       tabindex="0">💰 งบประมาณ</a>
-    <a id="nav-activity"     onclick="showPage('activity')"     tabindex="0">📅 กิจกรรม</a>
-    <a id="nav-voice"        onclick="showPage('voice')"        tabindex="0">💬 ความคิดเห็น</a>
-    <a id="nav-integrity"    onclick="showPage('integrity')"    tabindex="0">⭐ คุณธรรม</a>
-    <a id="nav-dashboard"    onclick="showPage('dashboard')"    tabindex="0">📊 Dashboard</a>
-  </div>
-  <div class="nav-right">
-    <button class="hamburger" id="hamburgerBtn" onclick="toggleMobileMenu()"
-            aria-label="เปิด/ปิดเมนู" aria-expanded="false">
-      <span></span><span></span><span></span>
-    </button>
-  </div>
-</nav>
-
-<!-- Mobile Menu -->
-<div class="mobile-menu" id="mobileMenu" role="navigation">
-  <a id="mnav-home"         onclick="showPage('home');         closeMobileMenu()">🏠 หน้าหลัก</a>
-  <a id="mnav-announcement" onclick="showPage('announcement'); closeMobileMenu()">📢 ประกาศ</a>
-  <a id="mnav-budget"       onclick="showPage('budget');       closeMobileMenu()">💰 งบประมาณ</a>
-  <a id="mnav-activity"     onclick="showPage('activity');     closeMobileMenu()">📅 กิจกรรม</a>
-  <a id="mnav-voice"        onclick="showPage('voice');        closeMobileMenu()">💬 ความคิดเห็น</a>
-  <a id="mnav-integrity"    onclick="showPage('integrity');    closeMobileMenu()">⭐ คุณธรรม</a>
-  <a id="mnav-dashboard"    onclick="showPage('dashboard');    closeMobileMenu()">📊 Dashboard</a>
-</div>
-
-<!-- ==================== HOME ==================== -->
-<div id="home" class="page active">
-  <div class="hero-wrapper">
-    <div class="hero-dots" aria-hidden="true"></div>
-    <div class="hero-deco hero-deco-1" aria-hidden="true"></div>
-    <div class="hero-deco hero-deco-2" aria-hidden="true"></div>
-    <div class="hero-deco hero-deco-3" aria-hidden="true"></div>
+<!-- HERO -->
+<section class="hero" id="main-content" aria-label="หน้าแรก">
+  <div class="hero-bg"></div>
+  <canvas id="hero-canvas"></canvas>
+  <div class="hero-inner">
 
     <div class="hero-content">
-      <div class="hero-school-badge">โรงเรียนเทศบาลจุ่งฮั่ว จังหวัดพัทลุง</div>
-
-      <h1 class="hero-title">HONEST HUB</h1>
-      <p class="hero-title-sub">ศูนย์กลางความโปร่งใส</p>
-
-      <div class="hero-divider">
-        <span></span><em>✦</em><span></span>
+      <div class="hero-eyebrow anim-fade-up">
+        <span class="eyebrow-dot"></span>
+        งานคุณภาพ · ส่งทั่วไทย · รับประกันความพอใจ
       </div>
-
-      <p class="hero-desc">
-        แพลตฟอร์มกลางเพื่อความโปร่งใสของโรงเรียนเทศบาลจุ่งฮั่ว<br>
-        รวบรวมข้อมูลงบประมาณ กิจกรรม ข่าวสาร และช่องทางแสดงความคิดเห็น<br>
-        เปิดเผย ตรวจสอบได้ และมีส่วนร่วมได้ในทุกมิติ
+      <h1 class="hero-title anim-fade-up anim-delay-1">
+        ทำให้ทุกภาพ<br>
+        <span class="line-accent">กลายเป็นของที่ระลึก</span><br>
+        ที่สวยงามที่สุด
+      </h1>
+      <p class="hero-desc anim-fade-up anim-delay-2">
+        บริการพิมพ์ภาพโพลารอยด์ นามบัตร บัตรแขวนคอ บัตรนักเรียน<br>
+        ป้ายร้านค้า QR Code ป้ายตุ๊กตา และอีกมากมาย
       </p>
-
-      <div class="hero-stats">
-        <div class="hero-stat">🎓 <span>ม.1–ม.6</span></div>
-        <div class="hero-stat">👁️ เปิดเผยข้อมูล</div>
-        <div class="hero-stat">⚡ <span>Real-time</span></div>
-        <div class="hero-stat">🔒 ปลอดภัย</div>
+      <div class="hero-cta anim-fade-up anim-delay-3">
+        <a href="catalog.html" class="btn btn-primary btn-xl">🛍️ ดูสินค้าทั้งหมด</a>
+        <a href="gallery.html" class="btn btn-secondary btn-xl">📸 ดูตัวอย่างงาน</a>
+      </div>
+      <div class="hero-trust anim-fade-up anim-delay-4">
+        <div class="trust-item"><span class="trust-icon">📦</span><span><span class="trust-val">500+</span> ออเดอร์</span></div>
+        <div class="trust-sep"></div>
+        <div class="trust-item"><span class="trust-icon">⭐</span><span><span class="trust-val">4.9/5</span> รีวิว</span></div>
+        <div class="trust-sep"></div>
+        <div class="trust-item"><span class="trust-icon">🚀</span><span><span class="trust-val">1-3</span> วันทำการ</span></div>
+        <div class="trust-sep"></div>
+        <div class="trust-item"><span class="trust-icon">🛡️</span><span><span class="trust-val">รับประกัน</span> คุณภาพ</span></div>
       </div>
     </div>
 
-    <!-- Hub Cards -->
-    <div class="hubs-section">
-      <div class="hubs-label">— เลือกหัวข้อที่ต้องการ —</div>
-      <div class="hubs-grid">
-
-        <div class="hub-card" onclick="showPage('announcement')" tabindex="0" role="button">
-          <div class="hub-card-icon">📢</div>
-          <div class="hub-number">HUB 00</div>
-          <div class="hub-name">ประกาศ & ข่าวสาร</div>
-          <div class="hub-desc">ข่าวสารและประกาศของโรงเรียนรายวัน</div>
-          <div class="hub-arrow">ดูประกาศ →</div>
+    <!-- Hero Card Carousel -->
+    <div class="hero-visual">
+      <div class="hero-carousel" id="hero-carousel">
+        <div class="hcard hcard-lg hc-active" data-idx="0">
+          <div class="hcard-inner">
+            <span class="hcard-emoji">📸</span>
+            <div class="hcard-label">โพลารอยด์</div>
+            <div class="hcard-sub">3×4 · 4×6 · Square</div>
+            <div class="hcard-dots"><div class="hcard-dot on"></div><div class="hcard-dot on"></div><div class="hcard-dot"></div></div>
+          </div>
         </div>
-
-        <div class="hub-card" onclick="showPage('budget')" tabindex="0" role="button">
-          <div class="hub-card-icon">💰</div>
-          <div class="hub-number">HUB 01</div>
-          <div class="hub-name">งบประมาณ</div>
-          <div class="hub-desc">งบประมาณกิจกรรม ตรวจสอบสถานะการใช้งบ</div>
-          <div class="hub-arrow">ดูงบประมาณ →</div>
+        <div class="hcard hcard-sm hc-back" data-idx="1">
+          <div class="hcard-inner">
+            <span class="hcard-emoji">🪪</span>
+            <div class="hcard-label">บัตรแขวนคอ</div>
+            <div class="hcard-sub">PVC · ทนทาน</div>
+          </div>
         </div>
-
-        <div class="hub-card" onclick="showPage('activity')" tabindex="0" role="button">
-          <div class="hub-card-icon">📅</div>
-          <div class="hub-number">HUB 02</div>
-          <div class="hub-name">กิจกรรม</div>
-          <div class="hub-desc">กิจกรรมของโรงเรียนทั้งหมด</div>
-          <div class="hub-arrow">ดูกิจกรรม →</div>
+        <div class="hcard hcard-sm hc-hidden" data-idx="2">
+          <div class="hcard-inner">
+            <span class="hcard-emoji">💼</span>
+            <div class="hcard-label">นามบัตร</div>
+            <div class="hcard-sub">100 ใบ · พรีเมียม</div>
+          </div>
         </div>
-
-        <div class="hub-card" onclick="showPage('voice')" tabindex="0" role="button">
-          <div class="hub-card-icon">💬</div>
-          <div class="hub-number">HUB 03</div>
-          <div class="hub-name">ความคิดเห็น</div>
-          <div class="hub-desc">แสดงความคิดเห็น ข้อเสนอแนะ</div>
-          <div class="hub-arrow">แสดงความคิดเห็น →</div>
-        </div>
-
-        <div class="hub-card" onclick="showPage('integrity')" tabindex="0" role="button">
-          <div class="hub-card-icon">⭐</div>
-          <div class="hub-number">HUB 04</div>
-          <div class="hub-name">คุณธรรม & ความซื่อสัตย์</div>
-          <div class="hub-desc">ความรู้เรื่องความซื่อสัตย์และต้านทุจริต</div>
-          <div class="hub-arrow">เรียนรู้ →</div>
-        </div>
-
-        <div class="hub-card" onclick="showPage('dashboard')" tabindex="0" role="button">
-          <div class="hub-card-icon">📊</div>
-          <div class="hub-number">HUB 05</div>
-          <div class="hub-name">Dashboard</div>
-          <div class="hub-desc">สถิติผู้เข้าชมและภาพรวมเว็บไซต์</div>
-          <div class="hub-arrow">ดูสถิติ →</div>
-        </div>
-
       </div>
+      <div class="hero-float-badge">
+        <span class="float-badge-icon">✅</span>
+        <div class="float-badge-text">
+          <strong>ออเดอร์ล่าสุด เสร็จแล้ว</strong>
+          <span>เมื่อ 2 ชั่วโมงที่แล้ว</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- CATEGORIES -->
+<section class="section categories">
+  <div class="section-inner">
+    <div class="section-header">
+      <div><h2 class="section-title">หมวดหมู่ <span class="text-accent">สินค้า</span></h2><p class="section-sub">เลือกประเภทที่ต้องการ มีครบทุกอย่าง</p></div>
+      <a href="catalog.html" class="see-all-link">ดูทั้งหมด →</a>
+    </div>
+    <div class="cat-grid" id="categories-grid">
+      <a href="catalog.html?cat=polaroid"      class="cat-card"><span class="cat-icon">📸</span><div class="cat-name">รูปโพลารอยด์</div><div class="cat-count">12 รายการ</div></a>
+      <a href="catalog.html?cat=lanyard"       class="cat-card"><span class="cat-icon">🪪</span><div class="cat-name">บัตรแขวนคอ</div><div class="cat-count">8 รายการ</div></a>
+      <a href="catalog.html?cat=business-card" class="cat-card"><span class="cat-icon">💼</span><div class="cat-name">นามบัตร</div><div class="cat-count">15 รายการ</div></a>
+      <a href="catalog.html?cat=shop-sign"     class="cat-card"><span class="cat-icon">🏪</span><div class="cat-name">ป้ายร้านค้า</div><div class="cat-count">10 รายการ</div></a>
+      <a href="catalog.html?cat=qrcode"        class="cat-card"><span class="cat-icon">📱</span><div class="cat-name">QR Code</div><div class="cat-count">6 รายการ</div></a>
+      <a href="catalog.html?cat=doll-tag"      class="cat-card"><span class="cat-icon">🧸</span><div class="cat-name">ป้ายตุ๊กตา</div><div class="cat-count">7 รายการ</div></a>
+      <a href="catalog.html?cat=student-card"  class="cat-card"><span class="cat-icon">🎓</span><div class="cat-name">บัตรนักเรียน</div><div class="cat-count">5 รายการ</div></a>
+      <a href="catalog.html"                   class="cat-card"><span class="cat-icon">✨</span><div class="cat-name">อื่นๆ</div><div class="cat-count">20+ รายการ</div></a>
     </div>
   </div>
+</section>
 
-  <footer class="footer">
-    <span>© 2569 HONEST HUB · โรงเรียนเทศบาลจุ่งฮั่ว จังหวัดพัทลุง</span>
-    <button class="admin-key-btn" onclick="openModal('adminLogin')">เฉพาะผู้ดูแลระบบ 🔑</button>
-  </footer>
-</div>
-
-<!-- ==================== ANNOUNCEMENT ==================== -->
-<div id="announcement" class="page">
-  <div class="inner-page">
-    <div class="inner-header">
-      <button class="back-btn" onclick="showPage('home')">← กลับหน้าหลัก</button>
-      <h1><span>ประกาศ</span> & ข่าวสาร</h1>
-      <p>ข่าวสารและประกาศของโรงเรียนเทศบาลจุ่งฮั่ว</p>
-      <div class="inner-header-meta">
-        <span class="inner-header-badge">📢 Announcement Hub</span>
-        <span class="inner-header-badge">⚡ อัปเดต Real-time</span>
-      </div>
+<!-- FEATURED PRODUCTS -->
+<section class="section" style="padding-top:0">
+  <div class="section-inner">
+    <div class="section-header">
+      <div><h2 class="section-title">สินค้า<span class="text-accent">แนะนำ</span></h2><p class="section-sub">คัดมาเฉพาะที่ลูกค้าชื่นชอบ</p></div>
+      <a href="catalog.html" class="see-all-link">ดูทั้งหมด →</a>
     </div>
-    <div class="inner-body">
-      <h2 class="section-title">ประกาศทั้งหมด</h2>
-      <p class="section-sub">อัปเดตโดยผู้ดูแลระบบ · ประกาศที่หมดอายุจะถูกซ่อนอัตโนมัติ</p>
-      <div class="action-row">
-        <button class="btn btn-gold admin-only" onclick="initAnnounceModal()">+ เพิ่มประกาศ</button>
-      </div>
-      <div class="announce-filter">
-        <button class="announce-filter-btn active" onclick="filterAnnounce(this,'all')">📋 ทั้งหมด</button>
-        <button class="announce-filter-btn" onclick="filterAnnounce(this,'urgent')">🚨 ด่วนมาก</button>
-        <button class="announce-filter-btn" onclick="filterAnnounce(this,'announce')">📌 ประกาศ</button>
-        <button class="announce-filter-btn" onclick="filterAnnounce(this,'activity')">📅 กิจกรรม</button>
-        <button class="announce-filter-btn" onclick="filterAnnounce(this,'mourning')">🎗️ ไว้อาลัย</button>
-        <button class="announce-filter-btn" onclick="filterAnnounce(this,'general')">💬 ทั่วไป</button>
-      </div>
-      <div class="announce-grid" id="announcementGrid"></div>
-      <div class="empty-state" id="announceEmpty" style="display:none">
-        <div class="empty-icon">📢</div>
-        <div class="empty-text">ยังไม่มีประกาศในขณะนี้</div>
-      </div>
+    <div class="product-grid" id="featured-products">
+      <!-- Skeleton replaced by JS -->
     </div>
   </div>
-  <footer class="footer">
-    <span>© 2569 HONEST HUB · โรงเรียนเทศบาลจุ่งฮั่ว จังหวัดพัทลุง</span>
-    <button class="admin-key-btn" onclick="openModal('adminLogin')">เฉพาะผู้ดูแลระบบ 🔑</button>
-  </footer>
-</div>
+</section>
 
-<!-- ==================== BUDGET ==================== -->
-<div id="budget" class="page">
-  <div class="inner-page">
-    <div class="inner-header">
-      <button class="back-btn" onclick="showPage('home')">← กลับหน้าหลัก</button>
-      <h1><span>งบประมาณ</span> กิจกรรม</h1>
-      <p>งบประมาณกิจกรรมโรงเรียนเทศบาลจุ่งฮั่ว</p>
-      <div class="inner-header-meta">
-        <span class="inner-header-badge">💰 Budget Hub</span>
-        <span class="inner-header-badge">📅 ปีงบประมาณ 2569</span>
+<!-- PROMO BANNER -->
+<div class="promo-section">
+  <div class="promo-banner">
+    <div class="promo-inner">
+      <div>
+        <div class="promo-tag">🎁 โปรโมชั่นพิเศษ</div>
+        <h3>ออเดอร์แรก ลด 15%</h3>
+        <p>สั่งครั้งแรกรับส่วนลดทันที ไม่มีขั้นต่ำ ส่งทั่วประเทศไทย</p>
       </div>
-    </div>
-    <div class="inner-body">
-      <h2 class="section-title">รายการงบประมาณกิจกรรม</h2>
-      <p class="section-sub">แสดงงบประมาณกิจกรรมทั้งหมด อัปเดตโดยผู้ดูแลระบบ</p>
-      <div class="action-row">
-        <button class="btn btn-gold admin-only" onclick="openModal('addBudget')">+ เพิ่มรายการงบประมาณ</button>
-      </div>
-      <div class="skeleton-loader" style="display:none">
-        <div class="skeleton-row"></div>
-        <div class="skeleton-row"></div>
-        <div class="skeleton-row"></div>
-      </div>
-      <div class="table-scroll">
-        <table id="budgetTable" aria-label="ตารางงบประมาณ">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>ชื่อกิจกรรม</th>
-              <th>งบประมาณ (บาท)</th>
-              <th>วันที่</th>
-              <th>สถานะ</th>
-              <th class="admin-only-th">จัดการ</th>
-            </tr>
-          </thead>
-          <tbody id="budgetBody"></tbody>
-        </table>
-      </div>
-      <div class="empty-state" id="budgetEmpty" style="display:none">
-        <div class="empty-icon">💰</div>
-        <div class="empty-text">ยังไม่มีรายการงบประมาณ</div>
-      </div>
-    </div>
-  </div>
-  <footer class="footer">
-    <span>© 2569 HONEST HUB · โรงเรียนเทศบาลจุ่งฮั่ว จังหวัดพัทลุง</span>
-    <button class="admin-key-btn" onclick="openModal('adminLogin')">เฉพาะผู้ดูแลระบบ 🔑</button>
-  </footer>
-</div>
-
-<!-- ==================== ACTIVITY ==================== -->
-<div id="activity" class="page">
-  <div class="inner-page">
-    <div class="inner-header">
-      <button class="back-btn" onclick="showPage('home')">← กลับหน้าหลัก</button>
-      <h1><span>กิจกรรม</span> โรงเรียน</h1>
-      <p>กิจกรรมปัจจุบันของโรงเรียนเทศบาลจุ่งฮั่ว</p>
-      <div class="inner-header-meta">
-        <span class="inner-header-badge">📅 Activity Hub</span>
-      </div>
-    </div>
-    <div class="inner-body">
-      <h2 class="section-title">กิจกรรมทั้งหมด</h2>
-      <p class="section-sub">ข้อมูลกิจกรรมที่กำลังดำเนินการและกำลังจะมาถึง</p>
-      <div class="action-row">
-        <button class="btn btn-gold admin-only" onclick="openModal('addActivity')">+ เพิ่มกิจกรรม</button>
-      </div>
-      <div class="skeleton-loader" style="display:none">
-        <div class="skeleton-card"></div>
-        <div class="skeleton-card"></div>
-      </div>
-      <div class="activity-grid" id="activityGrid" role="list"></div>
-      <div class="empty-state" id="activityEmpty" style="display:none">
-        <div class="empty-icon">📅</div>
-        <div class="empty-text">ยังไม่มีกิจกรรมในขณะนี้</div>
-      </div>
-    </div>
-  </div>
-  <footer class="footer">
-    <span>© 2569 HONEST HUB · โรงเรียนเทศบาลจุ่งฮั่ว จังหวัดพัทลุง</span>
-    <button class="admin-key-btn" onclick="openModal('adminLogin')">เฉพาะผู้ดูแลระบบ 🔑</button>
-  </footer>
-</div>
-
-<!-- ==================== DASHBOARD ==================== -->
-<div id="dashboard" class="page">
-  <div class="inner-page">
-    <div class="inner-header">
-      <button class="back-btn" onclick="showPage('home')">← กลับหน้าหลัก</button>
-      <h1><span>Dashboard</span></h1>
-      <p>สถิติและข้อมูลเว็บไซต์แบบเรียลไทม์</p>
-      <div class="inner-header-meta">
-        <span class="inner-header-badge">📊 Live Stats</span>
-      </div>
-    </div>
-    <div class="inner-body">
-      <h2 class="section-title">ภาพรวมเว็บไซต์</h2>
-      <p class="section-sub">อัปเดตอัตโนมัติจากผู้ใช้งานจริง</p>
-      <div class="dash-grid">
-        <div class="dash-card">
-          <div class="dash-num" id="visitorCount">0</div>
-          <div class="dash-label">👁️ ผู้เข้าชมทั้งหมด</div>
-          <div class="dash-trend">↑ เพิ่มขึ้นต่อเนื่อง</div>
-        </div>
-        <div class="dash-card dash-card--green">
-          <div class="dash-num" id="suggestionCount">0</div>
-          <div class="dash-label">💬 ความคิดเห็นทั้งหมด</div>
-          <div class="dash-trend" id="suggTrend">กำลังรอข้อมูล...</div>
-        </div>
-        <div class="dash-card dash-card--blue">
-          <div class="dash-num" id="activityCount">0</div>
-          <div class="dash-label">📅 กิจกรรมทั้งหมด</div>
-          <div class="dash-trend">อัปเดตล่าสุด: วันนี้</div>
-        </div>
-        <div class="dash-card dash-card--red">
-          <div class="dash-num" id="budgetCount">0</div>
-          <div class="dash-label">💰 รายการงบประมาณ</div>
-          <div class="dash-trend">ปีงบประมาณ 2569</div>
-        </div>
-        <div class="dash-card dash-card--announce">
-          <div class="dash-num" id="announceCount">0</div>
-          <div class="dash-label">📢 ประกาศทั้งหมด</div>
-          <div class="dash-trend">อัปเดตโดยผู้ดูแลระบบ</div>
-        </div>
-      </div>
-      <div class="chart-panel">
-        <div class="chart-panel-title">📈 กิจกรรมล่าสุดบนเว็บไซต์</div>
-        <div id="activityLog" role="log" aria-live="polite"></div>
-      </div>
-    </div>
-  </div>
-  <footer class="footer">
-    <span>© 2569 HONEST HUB · โรงเรียนเทศบาลจุ่งฮั่ว จังหวัดพัทลุง</span>
-    <button class="admin-key-btn" onclick="openModal('adminLogin')">เฉพาะผู้ดูแลระบบ 🔑</button>
-  </footer>
-</div>
-
-<!-- ==================== VOICE ==================== -->
-<div id="voice" class="page">
-  <div class="inner-page">
-    <div class="inner-header">
-      <button class="back-btn" onclick="showPage('home')">← กลับหน้าหลัก</button>
-      <h1><span>ความคิดเห็น</span> & ข้อเสนอแนะ</h1>
-      <p>แสดงความคิดเห็นและข้อเสนอแนะต่อโรงเรียน</p>
-      <div class="inner-header-meta">
-        <span class="inner-header-badge">💬 Voice Hub</span>
-        <span class="inner-header-badge">⚡ Real-time</span>
-      </div>
-    </div>
-    <div class="inner-body">
-      <div class="voice-form-panel">
-        <h2 class="section-title" style="margin-bottom:20px;">✍️ แสดงความคิดเห็น</h2>
-        <div class="form-group">
-          <label for="commentName">ชื่อ (หรือนิรนาม)</label>
-          <input type="text" id="commentName" placeholder="ระบุชื่อ หรือเว้นว่างเพื่อไม่ระบุตัวตน" maxlength="60" autocomplete="off">
-        </div>
-        <div class="form-group">
-          <label for="commentCat">หมวดหมู่</label>
-          <select id="commentCat">
-            <option>งบประมาณ</option>
-            <option>กิจกรรม</option>
-            <option>ความโปร่งใส</option>
-            <option>ข้อเสนอแนะทั่วไป</option>
-            <option>อื่นๆ</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="commentText">ความคิดเห็น <span class="required">*</span></label>
-          <textarea id="commentText" rows="4" placeholder="พิมพ์ความคิดเห็นของคุณ..." maxlength="500"></textarea>
-          <div id="commentCharCount" class="char-count">0 / 500 ตัวอักษร</div>
-          <div class="form-error" id="commentTextError" role="alert"></div>
-        </div>
-        <div class="cooldown-bar" id="cooldownBar" style="display:none">
-          <span>⏳ กรุณารอ <strong id="cooldownTimer">30</strong> วินาที ก่อนส่งอีกครั้ง</span>
-        </div>
-        <button class="btn btn-gold" id="submitCommentBtn" onclick="submitComment()">📨 ส่งความคิดเห็น</button>
-        <p class="form-note">* ความคิดเห็นจะถูกแจ้งเตือนไปยังผู้ดูแลระบบทันที · ระบบกรองคำไม่เหมาะสมอัตโนมัติ</p>
-      </div>
-      <h2 class="section-title">ความคิดเห็นทั้งหมด</h2>
-      <p class="section-sub" id="commentCountLabel">กำลังโหลด...</p>
-      <div class="comment-list" id="commentList" role="list"></div>
-      <div class="empty-state" id="commentEmpty" style="display:none">
-        <div class="empty-icon">💬</div>
-        <div class="empty-text">ยังไม่มีความคิดเห็น เป็นคนแรกที่แสดงความคิดเห็น!</div>
-      </div>
-    </div>
-  </div>
-  <footer class="footer">
-    <span>© 2569 HONEST HUB · โรงเรียนเทศบาลจุ่งฮั่ว จังหวัดพัทลุง</span>
-    <button class="admin-key-btn" onclick="openModal('adminLogin')">เฉพาะผู้ดูแลระบบ 🔑</button>
-  </footer>
-</div>
-
-<!-- ==================== INTEGRITY ==================== -->
-<div id="integrity" class="page">
-  <div class="inner-page">
-    <div class="inner-header">
-      <button class="back-btn" onclick="showPage('home')">← กลับหน้าหลัก</button>
-      <h1><span>คุณธรรม</span> & ความซื่อสัตย์</h1>
-      <p>ความรู้เรื่องความซื่อสัตย์สุจริตและการต้านทุจริต</p>
-      <div class="inner-header-meta">
-        <span class="inner-header-badge">⭐ Integrity Hub</span>
-      </div>
-    </div>
-    <div class="inner-body">
-      <h2 class="section-title">บทเรียนและองค์ความรู้</h2>
-      <p class="section-sub">สื่อการเรียนรู้เพื่อสร้างวัฒนธรรมความซื่อสัตย์</p>
-      <div class="integrity-grid">
-        <article class="integrity-card">
-          <div class="integrity-icon">🔍</div>
-          <h3 class="integrity-title">การทุจริตคืออะไร?</h3>
-          <p class="integrity-text">การทุจริตคือการใช้อำนาจหน้าที่เพื่อประโยชน์ส่วนตน ซึ่งส่งผลเสียต่อสังคมส่วนรวม ทั้งในด้านทรัพยากร ความไว้วางใจ และความยุติธรรม</p>
-          <span class="integrity-tag">📖 บทเรียนพื้นฐาน</span>
-        </article>
-        <article class="integrity-card">
-          <div class="integrity-icon">⚖️</div>
-          <h3 class="integrity-title">หลักความซื่อสัตย์สุจริต</h3>
-          <p class="integrity-text">ความซื่อสัตย์สุจริตประกอบด้วย ความตรงไปตรงมา การรักษาคำพูด และการปฏิบัติตามกฎระเบียบอย่างเสมอต้นเสมอปลาย</p>
-          <span class="integrity-tag">🌟 คุณธรรมหลัก</span>
-        </article>
-        <article class="integrity-card">
-          <div class="integrity-icon">🛡️</div>
-          <h3 class="integrity-title">การป้องกันการทุจริตในโรงเรียน</h3>
-          <p class="integrity-text">วิธีการป้องกัน เช่น การเปิดเผยข้อมูลงบประมาณ การมีระบบตรวจสอบ และการปลูกฝังค่านิยมที่ดีตั้งแต่วัยเรียน</p>
-          <span class="integrity-tag">🏫 ระดับโรงเรียน</span>
-        </article>
-        <article class="integrity-card">
-          <div class="integrity-icon">📢</div>
-          <h3 class="integrity-title">ผู้แจ้งเบาะแส (Whistleblower)</h3>
-          <p class="integrity-text">การแจ้งเบาะแสการทุจริตเป็นหน้าที่ของพลเมืองที่ดี มีกฎหมายคุ้มครองผู้แจ้งเบาะแสในประเทศไทยเพื่อสร้างความมั่นใจ</p>
-          <span class="integrity-tag">🔔 การมีส่วนร่วม</span>
-        </article>
-        <article class="integrity-card">
-          <div class="integrity-icon">🌱</div>
-          <h3 class="integrity-title">การปลูกฝังค่านิยมในเด็ก</h3>
-          <p class="integrity-text">เด็กที่ได้รับการปลูกฝังค่านิยมความซื่อสัตย์จะเติบโตเป็นผู้ใหญ่ที่มีคุณภาพ ส่งผลดีต่อสังคมและประเทศชาติในระยะยาว</p>
-          <span class="integrity-tag">👶 เยาวชน</span>
-        </article>
-        <article class="integrity-card">
-          <div class="integrity-icon">📊</div>
-          <h3 class="integrity-title">ดัชนีชี้วัดความโปร่งใส</h3>
-          <p class="integrity-text">ดัชนีการรับรู้การทุจริต (CPI) ของ Transparency International วัดระดับความโปร่งใสในภาครัฐ ประเทศไทยอยู่ในอันดับที่ต้องพัฒนาต่อเนื่อง</p>
-          <span class="integrity-tag">🌍 ระดับสากล</span>
-        </article>
-      </div>
-    </div>
-  </div>
-  <footer class="footer">
-    <span>© 2569 HONEST HUB · โรงเรียนเทศบาลจุ่งฮั่ว จังหวัดพัทลุง</span>
-    <button class="admin-key-btn" onclick="openModal('adminLogin')">เฉพาะผู้ดูแลระบบ 🔑</button>
-  </footer>
-</div>
-
-<!-- ==================== MODALS ==================== -->
-
-<!-- Add Budget -->
-<div class="modal-overlay" id="modal-addBudget" role="dialog" aria-modal="true">
-  <div class="modal">
-    <h3>💰 เพิ่มรายการงบประมาณ</h3>
-    <div class="form-group">
-      <label>ชื่อกิจกรรม <span class="required">*</span></label>
-      <input type="text" id="bName" placeholder="ระบุชื่อกิจกรรม" maxlength="100" autocomplete="off">
-      <div class="form-error" id="bNameError"></div>
-    </div>
-    <div class="form-group">
-      <label>งบประมาณ (บาท) <span class="required">*</span></label>
-      <input type="number" id="bAmount" placeholder="เช่น 15000" min="1" max="99999999" step="1" autocomplete="off">
-      <div class="form-error" id="bAmountError"></div>
-    </div>
-    <div class="form-group">
-      <label>วันที่ดำเนินการ</label>
-      <input type="date" id="bDate" data-datepicker>
-    </div>
-    <div class="form-group">
-      <label>สถานะ</label>
-      <select id="bStatus">
-        <option value="done">✓ เสร็จสิ้น</option>
-        <option value="progress">⟳ กำลังดำเนินการ</option>
-        <option value="pending">○ ยังไม่เริ่ม</option>
-      </select>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-outline" onclick="closeBudgetModal()">ยกเลิก</button>
-      <button class="btn btn-gold"    onclick="addBudgetRow()">💾 บันทึก</button>
+      <a href="catalog.html" class="btn btn-primary btn-lg" style="background:#fff;color:var(--accent-dark)">สั่งเลย →</a>
     </div>
   </div>
 </div>
 
-<!-- Add Activity -->
-<div class="modal-overlay" id="modal-addActivity" role="dialog" aria-modal="true">
-  <div class="modal">
-    <h3>📅 เพิ่มกิจกรรม</h3>
-    <div class="form-group">
-      <label>ชื่อกิจกรรม <span class="required">*</span></label>
-      <input type="text" id="aName" placeholder="ระบุชื่อกิจกรรม" maxlength="100" autocomplete="off">
-      <div class="form-error" id="aNameError"></div>
-    </div>
-    <div class="form-group">
-      <label>รายละเอียด</label>
-      <textarea id="aDesc" rows="3" placeholder="อธิบายกิจกรรม..." maxlength="300"></textarea>
-    </div>
-    <div class="form-group">
-      <label>วันที่จัดกิจกรรม</label>
-      <input type="date" id="aDate" data-datepicker>
-    </div>
-    <div class="form-group">
-      <label>สถานะ</label>
-      <select id="aStatus">
-        <option value="ongoing">กำลังดำเนินการ</option>
-        <option value="upcoming">กำลังจะมาถึง</option>
-        <option value="done">เสร็จสิ้นแล้ว</option>
-      </select>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-outline" onclick="closeActivityModal()">ยกเลิก</button>
-      <button class="btn btn-gold"    onclick="addActivityCard()">💾 บันทึก</button>
+<!-- FEATURES -->
+<section class="section" style="padding-top:0">
+  <div class="section-inner">
+    <div class="section-header"><div><h2 class="section-title">ทำไมต้อง <span class="text-accent">Diamond Cute Studio?</span></h2></div></div>
+    <div class="features-grid">
+      <div class="feature-card"><div class="feature-icon">🎨</div><div class="feature-title">คุณภาพพรีเมียม</div><div class="feature-desc">วัสดุคุณภาพสูง สีสดใส ทนทาน ไม่ซีดจาง มาตรฐานระดับมืออาชีพ</div></div>
+      <div class="feature-card"><div class="feature-icon">⚡</div><div class="feature-title">ผลิตรวดเร็ว</div><div class="feature-desc">ส่วนใหญ่เสร็จใน 1-3 วันทำการ มีบริการด่วนสำหรับงานเร่ง</div></div>
+      <div class="feature-card"><div class="feature-icon">🚚</div><div class="feature-title">ส่งทั่วประเทศ</div><div class="feature-desc">จัดส่งผ่าน Kerry, Flash, ไปรษณีย์ไทย ติดตามพัสดุได้ตลอด</div></div>
+      <div class="feature-card"><div class="feature-icon">💬</div><div class="feature-title">บริการใส่ใจ</div><div class="feature-desc">ปรึกษาฟรีผ่าน LINE ตอบเร็ว แก้ไขงานได้จนพอใจ</div></div>
     </div>
   </div>
-</div>
+</section>
 
-<!-- Add Announcement -->
-<div class="modal-overlay" id="modal-addAnnouncement" role="dialog" aria-modal="true">
-  <div class="modal">
-    <h3>📢 เพิ่มประกาศ</h3>
-    <div class="form-group">
-      <label>ประเภทประกาศ</label>
-      <select id="anType">
-        <option value="urgent">🔴 ด่วนมาก</option>
-        <option value="announce" selected>📌 ประกาศ</option>
-        <option value="activity">📅 กิจกรรม</option>
-        <option value="mourning">🎗️ ไว้อาลัย</option>
-        <option value="general">ℹ️ ทั่วไป</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label>หัวข้อประกาศ <span class="required">*</span></label>
-      <input type="text" id="anTitle" placeholder="เช่น โรงเรียนหยุดพิเศษวันที่ 5 มิ.ย." maxlength="150" autocomplete="off">
-      <div class="form-error" id="anTitleError"></div>
-    </div>
-    <div class="form-group">
-      <label>รายละเอียด</label>
-      <textarea id="anBody" rows="3" placeholder="รายละเอียดเพิ่มเติม..." maxlength="500"></textarea>
-    </div>
-    <div class="form-group">
-      <label>วันที่ประกาศ</label>
-      <input type="date" id="anDate" data-datepicker>
-    </div>
-    <div class="form-group">
-      <label>วันหมดอายุ <span style="font-weight:400;color:var(--text-muted);">(ไม่กรอก = แสดงตลอด)</span></label>
-      <input type="date" id="anExpire" data-datepicker>
-      <small style="color:var(--text-muted);font-size:0.74rem;display:block;margin-top:4px;line-height:1.6;">
-        💡 ถ้าประกาศ <strong>1 วัน</strong> → เลือกวันเดียวกับวันประกาศได้เลย<br>
-        ระบบจะแสดงถึง <strong>23:59 น.</strong> ของวันนั้น แล้วซ่อนอัตโนมัติ
-      </small>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-outline" onclick="closeAnnounceModal()">ยกเลิก</button>
-      <button class="btn btn-gold"    onclick="addAnnouncement()">📢 เผยแพร่</button>
-    </div>
-  </div>
-</div>
 
-<!-- Admin Login -->
-<div class="modal-overlay" id="modal-adminLogin" role="dialog" aria-modal="true">
-  <div class="modal modal--admin">
-    <div class="admin-modal-icon">🔑</div>
-    <h3 class="admin-modal-title">เข้าสู่ระบบผู้ดูแล</h3>
-    <p class="admin-modal-sub">เฉพาะผู้ดูแลระบบที่ได้รับอนุญาตเท่านั้น</p>
-    <div class="form-group">
-      <label>รหัสผ่านผู้ดูแลระบบ</label>
-      <div class="pw-input-wrap">
-        <input type="password" id="adminPwInput" placeholder="กรอกรหัสผ่าน"
-               autocomplete="off" onkeydown="if(event.key==='Enter') verifyAdmin()">
-        <button class="pw-toggle" type="button" onclick="togglePwVisibility()" aria-label="แสดง/ซ่อนรหัสผ่าน">👁</button>
-      </div>
-    </div>
-    <div class="admin-error"     id="adminError"      role="alert"></div>
-    <div class="lockout-warning" id="lockoutWarning"  role="alert"></div>
-    <div class="modal-footer">
-      <button class="btn btn-outline" onclick="cancelAdminLogin()">ยกเลิก</button>
-      <button class="btn btn-gold"    onclick="verifyAdmin()">🔓 เข้าสู่ระบบ</button>
-    </div>
-  </div>
-</div>
-
-<!-- ==================== SCRIPTS ==================== -->
+<div id="footer-mount"></div>
+<div id="toast-container"></div>
+<script src="js/loading.js"></script>
 <script src="js/utils.js"></script>
-<script src="js/theme.js"></script>
-<script src="js/datepicker.js"></script>
-<script src="js/notify.js"></script>
-<script src="js/app.js"></script>
-<script src="js/admin.js"></script>
-<script src="js/budget.js"></script>
-<script src="js/activity.js"></script>
-<script src="js/voice.js"></script>
-<script src="js/announcement.js"></script>
-<script src="js/dashboard.js"></script>
-
+<script src="js/navbar.js"></script>
+<script src="js/footer.js"></script>
+<script src="js/theme-switcher.js"></script>
+<script src="js/admin-access.js"></script>
+<script src="js/home.js"></script>
 </body>
 </html>
